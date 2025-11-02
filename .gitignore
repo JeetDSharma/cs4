@@ -8,3 +8,5 @@ scripts/__pycache__/
 scripts/utils/__pycache__/
 .ipynb_checkpoints/
 .env
+data
+notebooks/api_usage.txt
