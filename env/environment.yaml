@@ -1,7 +1,21 @@
-name: dolma
-channels: [conda-forge, defaults]
+name: cs4
+channels:
+  - conda-forge
+  - defaults
 dependencies:
+  # Python version
   - python=3.10
+  
+  # Core conda packages (faster installation, better compiled)
+  - numpy>=1.24.0,<2.0
+  - pandas>=2.0.0
+  - pyyaml>=6.0
+  - requests>=2.32.0
+  - tqdm>=4.67.0
+  
+  # Install pip for requirements.txt packages
   - pip
+  
+  # Install pip packages from requirements.txt
   - pip:
-      - -r dolma/env/requirements.txt
+      - -r ../requirements.txt

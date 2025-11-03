@@ -12,13 +12,25 @@ handlers:
     class: logging.FileHandler
     level: INFO
     formatter: std
-    filename: "dolma/logs/pipeline_master.log"
+    filename: "data/logs/pipeline_master.log"
 loggers:
-  DolmaDownloader:
+  CS4Downloader:
     level: INFO
     handlers: [console, file]
     propagate: false
-  DolmaExtractor:
+  CS4Parser:
+    level: INFO
+    handlers: [console, file]
+    propagate: false
+  CS4Generator:
+    level: INFO
+    handlers: [console, file]
+    propagate: false
+  CS4Evaluator:
+    level: INFO
+    handlers: [console, file]
+    propagate: false
+  CS4Pipeline:
     level: INFO
     handlers: [console, file]
     propagate: false

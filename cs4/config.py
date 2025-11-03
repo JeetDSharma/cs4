@@ -27,34 +27,26 @@ class Config:
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
     CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
     
-    # Default models
-    DEFAULT_CONSTRAINT_GEN_MODEL = "gpt-4-mini"
-    DEFAULT_BASE_GEN_MODEL = "gpt-4-mini"
-    DEFAULT_FITTING_MODEL = "gpt-4-mini"
-    DEFAULT_EVALUATION_MODEL = "gpt-4-mini"
+    # Default models per task - single source of truth for each pipeline stage
+    DEFAULT_MERGE_MODEL = "gpt-4.1-mini"           # Blog merging
+    DEFAULT_CONSTRAINT_MODEL = "gpt-4.1-mini"      # Constraint generation
+    DEFAULT_BASE_GEN_MODEL = "gpt-4.1-mini"        # Base content generation
+    DEFAULT_FITTING_MODEL = "gpt-4.1-mini"         # Constraint fitting
+    DEFAULT_EVALUATION_MODEL = "gpt-4.1-mini"      # Evaluation
     
-    # Generation parameters
-    DEFAULT_TEMPERATURE = 0.7
-    DEFAULT_MAX_TOKENS = 4096
+    # Fallback default model (if task-specific not specified)
+    DEFAULT_MODEL = "gpt-4.1-mini"
     
     # Constraint parameters
     NUM_CONSTRAINTS = 39
-    
-    # Data processing
-    MIN_TEXT_LENGTH = 500
-    MAX_TEXT_LENGTH = 2000
     
     # Similarity thresholds
     SIMILAR_THRESHOLD = 0.75
     DISSIMILAR_THRESHOLD = 0.40
     
-    # Retry parameters
+    # LLM API retry parameters (for API calls)
     MAX_RETRIES = 3
     RETRY_DELAY = 1.0  # seconds
-    
-    # Logging
-    LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-    LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
     
     @classmethod
     def load_domain_config(cls, domain: str) -> Dict[str, Any]:
