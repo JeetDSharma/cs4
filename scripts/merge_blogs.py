@@ -31,8 +31,8 @@ def main():
     )
     parser.add_argument(
         "--model",
-        default="gpt-4-mini",
-        help="LLM model to use (default: gpt-4-mini)"
+        default=Config.DEFAULT_MERGE_MODEL,
+        help=f"LLM model to use (default: {Config.DEFAULT_MERGE_MODEL})"
     )
     parser.add_argument(
         "--provider",
@@ -114,7 +114,6 @@ def main():
         # Print usage summary
         usage = get_total_usage()
         logger.info(f"Total API tokens: {usage['total_tokens']:,}")
-        logger.info(f"Estimated cost: ${usage['cost']:.2f}")
         
     except Exception as e:
         logger.error(f"Blog merging failed: {e}")

@@ -4,7 +4,7 @@ LLM client wrappers for OpenAI and Anthropic APIs with usage tracking.
 
 import os
 from datetime import datetime
-from typing import List, Dict, Optional, Any
+from typing import Dict, List, Any, Optional
 from pathlib import Path
 
 from openai import OpenAI
@@ -31,7 +31,7 @@ class UsageTracker:
     def get_total_usage(cls) -> Dict[str, Any]:
         """Calculate total usage statistics."""
         if not cls._usage_file.exists():
-            return {"total_tokens": 0, "cost": 0.0, "by_provider": {}}
+            return {"total_tokens": 0, "by_provider": {}}
         
         total_tokens = 0
         by_provider = {}
@@ -68,10 +68,12 @@ class OpenAIClient:
     def chat_completion(
         self,
         messages: List[Dict[str, str]],
-        model: str = "gpt-4.1-mini",  
+        model: str = None,
         **kwargs
     ) -> Any:
         """Create a chat completion."""
+        if model is None:
+            model = Config.DEFAULT_MODEL
         response = self.client.chat.completions.create(
             model=model,
             messages=messages,
@@ -97,7 +99,7 @@ class OpenAIClient:
         self,
         system_prompt: str,
         user_message: str,
-        model: str = "gpt-4.1-mini",
+        model: str = None,
         **kwargs
     ) -> str:
         """Simplified chat interface."""

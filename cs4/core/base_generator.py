@@ -20,7 +20,7 @@ class BaseGenerator:
     def __init__(
         self,
         llm_client: Optional[object] = None,
-        model: str = "gpt-4-mini",
+        model: str = None,
         content_type: str = "blog",
         retry_attempts: int = 3,
         delay: float = 1.0
@@ -38,7 +38,7 @@ class BaseGenerator:
             delay: Delay in seconds between retries
         """
         self.llm_client = llm_client or OpenAIClient(log_usage=True)
-        self.model = model
+        self.model = model or Config.DEFAULT_BASE_GEN_MODEL
         self.content_type = content_type
         self.retry_attempts = retry_attempts
         self.delay = delay

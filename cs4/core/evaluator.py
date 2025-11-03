@@ -21,7 +21,7 @@ class ConstraintEvaluator:
     def __init__(
         self,
         llm_client: Optional[object] = None,
-        model: str = "gpt-4-mini",
+        model: str = None,
         content_type: str = "blog",
         retry_attempts: int = 3,
         delay: float = 1.0
@@ -37,7 +37,7 @@ class ConstraintEvaluator:
             delay: Delay in seconds between retries
         """
         self.llm_client = llm_client or OpenAIClient(log_usage=True)
-        self.model = model
+        self.model = model or Config.DEFAULT_EVALUATION_MODEL
         self.content_type = content_type
         self.retry_attempts = retry_attempts
         self.delay = delay
@@ -215,7 +215,7 @@ class ConstraintEvaluator:
 def evaluate_constraints(
     input_path: str,
     output_path: str,
-    model: str = "gpt-4-mini",
+    model: str = None,
     content_type: str = "blog"
 ):
     """

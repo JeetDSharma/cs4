@@ -19,7 +19,7 @@ class ConstraintGenerator:
     def __init__(
         self,
         llm_client: Optional[object] = None,
-        model: str = "gpt-4.1-mini",
+        model: str = None,
         retry_attempts: int = 3,
         delay: float = 1.0
     ):
@@ -33,7 +33,7 @@ class ConstraintGenerator:
             delay: Delay in seconds between retries
         """
         self.llm_client = llm_client or OpenAIClient(log_usage=True)
-        self.model = model
+        self.model = model or Config.DEFAULT_CONSTRAINT_MODEL
         self.retry_attempts = retry_attempts
         self.delay = delay
         self.system_prompt = get_constraint_generation_prompt()
@@ -197,7 +197,7 @@ def generate_constraints(
     df: pd.DataFrame,
     chat_fn: Callable,
     system_prompt: str,
-    model: str = "gpt-4.1-mini",
+    model: str = None,
     output_path: str = "../data/constraints.csv",
     retry_attempts: int = 3,
     delay: float = 1.0
