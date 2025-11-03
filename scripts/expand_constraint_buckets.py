@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
 Expand constraints into progressive subsets (buckets) for testing.
-Based on expand_constraints_subsets from notebooks/fit_base_blog.ipynb
 """
 
 import argparse
