@@ -68,7 +68,7 @@ class OpenAIClient:
     def chat_completion(
         self,
         messages: List[Dict[str, str]],
-        model: str = "gpt-4-mini",  
+        model: str = "gpt-4.1-mini",  
         **kwargs
     ) -> Any:
         """Create a chat completion."""
@@ -97,7 +97,7 @@ class OpenAIClient:
         self,
         system_prompt: str,
         user_message: str,
-        model: str = "gpt-4-mini"
+        model: str = "gpt-4.1-mini",
         **kwargs
     ) -> str:
         """Simplified chat interface."""
@@ -160,7 +160,7 @@ class AnthropicClient:
         self,
         system_prompt: str,
         user_message: str,
-        model: str = "claude-3-sonnet-20240229"
+        model: str = "claude-3-sonnet-20240229",
         **kwargs
     ) -> str:
         """Simplified chat interface."""
