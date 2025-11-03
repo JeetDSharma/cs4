@@ -284,6 +284,19 @@ Output:
 """
 
 
+MERGE_PROMPT = """You are a professional editor. Merge the two blogs below into a single coherent blog post.
+
+Requirements:
+- The result should read like a natural, single-authored blog
+- Maintain the key ideas from both blogs
+- Create smooth transitions between topics
+- Ensure consistent tone and style throughout
+- The merged blog should be comprehensive and well-structured
+- Do not mention that it's a merge or reference "Blog 1" or "Blog 2"
+
+Output only the merged blog text, with no preamble or explanation."""
+
+
 def get_constraint_generation_prompt() -> str:
     """Get the constraint generation prompt."""
     return CONSTRAINT_GENERATION_PROMPT
@@ -321,3 +334,8 @@ def get_evaluation_prompt(
         content=content,
         constraints=constraints
     )
+
+
+def get_merge_prompt() -> str:
+    """Get the blog merge prompt."""
+    return MERGE_PROMPT

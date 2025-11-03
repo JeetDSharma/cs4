@@ -22,8 +22,6 @@ class BaseGenerator:
         llm_client: Optional[object] = None,
         model: str = "gpt-4-mini",
         content_type: str = "blog",
-        temperature: float = 0.7,
-        max_tokens: int = 4096,
         retry_attempts: int = 3,
         delay: float = 1.0
     ):
@@ -42,8 +40,6 @@ class BaseGenerator:
         self.llm_client = llm_client or OpenAIClient(log_usage=True)
         self.model = model
         self.content_type = content_type
-        self.temperature = temperature
-        self.max_tokens = max_tokens
         self.retry_attempts = retry_attempts
         self.delay = delay
         self.system_prompt = get_base_generation_prompt(content_type)
@@ -76,8 +72,6 @@ class BaseGenerator:
                             {"role": "user", "content": user_input}
                         ],
                         model=self.model,
-                        temperature=self.temperature,
-                        max_tokens=self.max_tokens
                     )
                     content = response.choices[0].message.content.strip()
                     tokens = response.usage.total_tokens
@@ -86,9 +80,7 @@ class BaseGenerator:
                         messages=[{"role": "user", "content": user_input}],
                         model=self.model,
                         system=self.system_prompt,
-                        max_tokens=self.max_tokens,
-                        temperature=self.temperature
-                    )
+                        )
                     content = response.content[0].text
                     tokens = response.usage.input_tokens + response.usage.output_tokens
                 else:
@@ -156,7 +148,6 @@ class BaseGenerator:
                     "content_length": len(content),
                     "model_used": self.model,
                     "tokens_used": tokens,
-                    "temperature": self.temperature,
                     "timestamp": datetime.now().isoformat()
                 })
                 
@@ -171,7 +162,6 @@ class BaseGenerator:
                     "content_length": 0,
                     "model_used": self.model,
                     "tokens_used": 0,
-                    "temperature": self.temperature,
                     "timestamp": datetime.now().isoformat()
                 })
         

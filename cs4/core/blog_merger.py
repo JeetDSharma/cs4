@@ -9,21 +9,8 @@ from time import sleep
 from typing import Optional
 from datetime import datetime
 
+from cs4.core.prompts import get_merge_prompt
 from cs4.utils.llm_client import OpenAIClient, AnthropicClient
-from cs4.config import Config
-
-
-MERGE_SYSTEM_PROMPT = """You are a professional editor. Merge the two blogs below into a single coherent blog post.
-
-Requirements:
-- The result should read like a natural, single-authored blog
-- Maintain the key ideas from both blogs
-- Create smooth transitions between topics
-- Ensure consistent tone and style throughout
-- The merged blog should be comprehensive and well-structured
-- Do not mention that it's a merge or reference "Blog 1" or "Blog 2"
-
-Output only the merged blog text, with no preamble or explanation."""
 
 
 class BlogMerger:
@@ -32,7 +19,7 @@ class BlogMerger:
     def __init__(
         self,
         llm_client: Optional[object] = None,
-        model: str = "gpt-4-mini",
+        model: str = "gpt-4.1-mini",
         retry_attempts: int = 3,
         delay: float = 1.0
     ):
@@ -49,7 +36,7 @@ class BlogMerger:
         self.model = model
         self.retry_attempts = retry_attempts
         self.delay = delay
-        self.system_prompt = MERGE_SYSTEM_PROMPT
+        self.system_prompt = get_merge_prompt()
         
         self.logger = logging.getLogger("CS4Generator")
     
@@ -80,9 +67,7 @@ class BlogMerger:
                             {"role": "system", "content": self.system_prompt},
                             {"role": "user", "content": user_prompt}
                         ],
-                        model=self.model,
-                        temperature=0.7,
-                        max_tokens=2048
+                        model=self.model
                     )
                     merged_text = response.choices[0].message.content.strip()
                     tokens = response.usage.total_tokens
@@ -90,9 +75,7 @@ class BlogMerger:
                     response = self.llm_client.create_message(
                         messages=[{"role": "user", "content": user_prompt}],
                         model=self.model,
-                        system=self.system_prompt,
-                        max_tokens=2048,
-                        temperature=0.7
+                        system=self.system_prompt   
                     )
                     merged_text = response.content[0].text
                     tokens = response.usage.input_tokens + response.usage.output_tokens
