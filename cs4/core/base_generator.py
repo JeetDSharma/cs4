@@ -1,6 +1,5 @@
 """
 Base content generation module - generates content from task descriptions only.
-Converted from base_blog_generate.ipynb
 """
 
 import pandas as pd

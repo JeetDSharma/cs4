@@ -1,6 +1,5 @@
 """
 Content summarization module - reduces content length while preserving key insights.
-Based on summarize_blog from notebooks/fit_base_blog.ipynb
 """
 
 import pandas as pd

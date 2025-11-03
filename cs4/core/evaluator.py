@@ -1,6 +1,5 @@
 """
 Constraint satisfaction evaluator module.
-Converted from constraint_satisfaction.py
 """
 
 import pandas as pd

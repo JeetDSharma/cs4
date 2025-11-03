@@ -1,6 +1,5 @@
 """
 Blog merging module - merges blog pairs using LLM.
-Refactored from scripts/merge_blogs.py to follow CS4 pattern.
 """
 
 import pandas as pd

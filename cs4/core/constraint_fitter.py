@@ -1,6 +1,5 @@
 """
 Constraint fitting module - fits base content to satisfy constraints.
-Converted from fit_base_blog.ipynb
 """
 
 import pandas as pd
