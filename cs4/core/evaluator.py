@@ -74,16 +74,14 @@ class ConstraintEvaluator:
                         messages=[
                             {"role": "user", "content": prompt}
                         ],
-                        model=self.model,
-                        temperature=0.3  # Lower temp for evaluation
+                        model=self.model
                     )
                     results = response.choices[0].message.content.strip()
                     tokens = response.usage.total_tokens
                 elif isinstance(self.llm_client, AnthropicClient):
                     response = self.llm_client.create_message(
                         messages=[{"role": "user", "content": prompt}],
-                        model=self.model,
-                        temperature=0.3
+                        model=self.model    
                     )
                     results = response.content[0].text
                     tokens = response.usage.input_tokens + response.usage.output_tokens
