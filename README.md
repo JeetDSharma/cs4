@@ -1,4 +1,4 @@
-# CS4: Measuring the Creativity of Large Language Models Automatically by Controlling the Number of Story-Writing Constraints
+# CS4: Comparing the Skill of Creating Stories by Controlling the Synthesized Constraint Specificity
 
 A modular framework for evaluating LLM creativity through structured constraint satisfaction across multiple domains (blogs, stories, news).
 
