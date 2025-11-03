@@ -1,0 +1,199 @@
+"""
+LLM client wrappers for OpenAI and Anthropic APIs with usage tracking.
+"""
+
+import os
+from datetime import datetime
+from typing import List, Dict, Optional, Any
+from pathlib import Path
+
+from openai import OpenAI
+from anthropic import Anthropic
+
+from cs4.config import Config
+
+
+class UsageTracker:
+    """Track API usage across all clients."""
+    
+    _usage_file = Config.LOGS_DIR / "api_usage.txt"
+    
+    @classmethod
+    def log_usage(cls, provider: str, model: str, tokens: int, metadata: Optional[Dict] = None):
+        """Log API usage to file."""
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        metadata_str = f" | {metadata}" if metadata else ""
+        
+        with open(cls._usage_file, "a") as f:
+            f.write(f"{timestamp} | {provider} | {model} | {tokens}{metadata_str}\n")
+    
+    @classmethod
+    def get_total_usage(cls) -> Dict[str, Any]:
+        """Calculate total usage statistics."""
+        if not cls._usage_file.exists():
+            return {"total_tokens": 0, "cost": 0.0, "by_provider": {}}
+        
+        total_tokens = 0
+        by_provider = {}
+        
+        with open(cls._usage_file, "r") as f:
+            for line in f:
+                parts = line.strip().split(" | ")
+                if len(parts) >= 4:
+                    provider = parts[1]
+                    tokens = int(parts[3])
+                    total_tokens += tokens
+                    
+                    if provider not in by_provider:
+                        by_provider[provider] = 0
+                    by_provider[provider] += tokens
+        
+        # Rough cost estimation (adjust based on actual pricing)
+        cost = (total_tokens * 0.0015) / 1000  # $0.0015 per 1K tokens
+        
+        return {
+            "total_tokens": total_tokens,
+            "cost": cost,
+            "by_provider": by_provider
+        }
+
+
+class OpenAIClient:
+    """Wrapper for OpenAI API with usage tracking."""
+    
+    def __init__(self, api_key: Optional[str] = None, log_usage: bool = True):
+        self.api_key = api_key or Config.get_api_key("openai")
+        if not self.api_key:
+            raise ValueError("OpenAI API key not provided")
+        
+        self.client = OpenAI(api_key=self.api_key)
+        self.log_usage = log_usage
+    
+    def chat_completion(
+        self,
+        messages: List[Dict[str, str]],
+        model: str = "gpt-4-mini",
+        temperature: float = 0.7,
+        max_tokens: int = 4096,
+        **kwargs
+    ) -> Any:
+        """Create a chat completion."""
+        response = self.client.chat.completions.create(
+            model=model,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            **kwargs
+        )
+        
+        if self.log_usage:
+            UsageTracker.log_usage(
+                provider="openai",
+                model=model,
+                tokens=response.usage.total_tokens,
+                metadata={"prompt_tokens": response.usage.prompt_tokens,
+                         "completion_tokens": response.usage.completion_tokens}
+            )
+        
+        return response
+    
+    def get_response_text(self, response: Any) -> str:
+        """Extract text from response."""
+        return response.choices[0].message.content.strip()
+    
+    def chat(
+        self,
+        system_prompt: str,
+        user_message: str,
+        model: str = "gpt-4-mini",
+        temperature: float = 0.7,
+        max_tokens: int = 4096,
+        **kwargs
+    ) -> str:
+        """Simplified chat interface."""
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message}
+        ]
+        response = self.chat_completion(
+            messages=messages,
+            model=model,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            **kwargs
+        )
+        return self.get_response_text(response)
+
+
+class AnthropicClient:
+    """Wrapper for Anthropic API with usage tracking."""
+    
+    def __init__(self, api_key: Optional[str] = None, log_usage: bool = True):
+        self.api_key = api_key or Config.get_api_key("anthropic")
+        if not self.api_key:
+            raise ValueError("Anthropic API key not provided")
+        
+        self.client = Anthropic(api_key=self.api_key)
+        self.log_usage = log_usage
+    
+    def create_message(
+        self,
+        messages: List[Dict[str, str]],
+        model: str = "claude-3-sonnet-20240229",
+        max_tokens: int = 4096,
+        temperature: float = 0.7,
+        system: Optional[str] = None,
+        **kwargs
+    ) -> Any:
+        """Create a message."""
+        response = self.client.messages.create(
+            model=model,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            system=system,
+            messages=messages,
+            **kwargs
+        )
+        
+        if self.log_usage:
+            # Anthropic usage is in response.usage
+            total_tokens = response.usage.input_tokens + response.usage.output_tokens
+            UsageTracker.log_usage(
+                provider="anthropic",
+                model=model,
+                tokens=total_tokens,
+                metadata={"input_tokens": response.usage.input_tokens,
+                         "output_tokens": response.usage.output_tokens}
+            )
+        
+        return response
+    
+    def get_response_text(self, response: Any) -> str:
+        """Extract text from response."""
+        return response.content[0].text
+    
+    def chat(
+        self,
+        system_prompt: str,
+        user_message: str,
+        model: str = "claude-3-sonnet-20240229",
+        max_tokens: int = 4096,
+        temperature: float = 0.7,
+        **kwargs
+    ) -> str:
+        """Simplified chat interface."""
+        messages = [{"role": "user", "content": user_message}]
+        response = self.create_message(
+            messages=messages,
+            model=model,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            system=system_prompt,
+            **kwargs
+        )
+        return self.get_response_text(response)
+
+
+def get_total_usage() -> Dict[str, Any]:
+    """Get total API usage statistics."""
+    return UsageTracker.get_total_usage()

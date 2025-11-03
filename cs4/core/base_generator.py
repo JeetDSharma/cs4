@@ -1,0 +1,184 @@
+"""
+Base content generation module - generates content from task descriptions only.
+Converted from base_blog_generate.ipynb
+"""
+
+import pandas as pd
+import logging
+from time import sleep
+from typing import Optional
+from datetime import datetime
+
+from cs4.core.prompts import get_base_generation_prompt
+from cs4.utils.llm_client import OpenAIClient, AnthropicClient
+from cs4.config import Config
+
+
+class BaseGenerator:
+    """Generate base content from task descriptions (without constraints)."""
+    
+    def __init__(
+        self,
+        llm_client: Optional[object] = None,
+        model: str = "gpt-4-mini",
+        content_type: str = "blog",
+        temperature: float = 0.7,
+        max_tokens: int = 4096,
+        retry_attempts: int = 3,
+        delay: float = 1.0
+    ):
+        """
+        Initialize base content generator.
+        
+        Args:
+            llm_client: LLM client (OpenAI or Anthropic)
+            model: Model identifier
+            content_type: Type of content (blog, story, news)
+            temperature: Generation temperature
+            max_tokens: Maximum tokens to generate
+            retry_attempts: Number of retry attempts on failure
+            delay: Delay in seconds between retries
+        """
+        self.llm_client = llm_client or OpenAIClient(log_usage=True)
+        self.model = model
+        self.content_type = content_type
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+        self.retry_attempts = retry_attempts
+        self.delay = delay
+        self.system_prompt = get_base_generation_prompt(content_type)
+        
+        self.logger = logging.getLogger("CS4Generator")
+    
+    def generate_base_content(
+        self,
+        task: str,
+        log: bool = True
+    ) -> tuple[str, int]:
+        """
+        Generate base content for a single task.
+        
+        Args:
+            task: Task description
+            log: Whether to log token usage
+            
+        Returns:
+            Tuple of (generated_content, tokens_used)
+        """
+        user_input = f"Task: {task}"
+        
+        for attempt in range(1, self.retry_attempts + 1):
+            try:
+                if isinstance(self.llm_client, OpenAIClient):
+                    response = self.llm_client.chat_completion(
+                        messages=[
+                            {"role": "system", "content": self.system_prompt},
+                            {"role": "user", "content": user_input}
+                        ],
+                        model=self.model,
+                        temperature=self.temperature,
+                        max_tokens=self.max_tokens
+                    )
+                    content = response.choices[0].message.content.strip()
+                    tokens = response.usage.total_tokens
+                elif isinstance(self.llm_client, AnthropicClient):
+                    response = self.llm_client.create_message(
+                        messages=[{"role": "user", "content": user_input}],
+                        model=self.model,
+                        system=self.system_prompt,
+                        max_tokens=self.max_tokens,
+                        temperature=self.temperature
+                    )
+                    content = response.content[0].text
+                    tokens = response.usage.input_tokens + response.usage.output_tokens
+                else:
+                    raise ValueError("Unknown client type")
+                
+                if log:
+                    self.logger.info(f"Total tokens used: {tokens}")
+                
+                return content, tokens
+                
+            except Exception as e:
+                self.logger.warning(
+                    f"Attempt {attempt}/{self.retry_attempts} failed: {e}"
+                )
+                if attempt < self.retry_attempts:
+                    sleep(self.delay)
+                else:
+                    raise
+        
+        raise RuntimeError("Failed to generate base content")
+    
+    def generate_batch(
+        self,
+        df: pd.DataFrame,
+        task_column: str = "main_task",
+        output_path: Optional[str] = None
+    ) -> pd.DataFrame:
+        """
+        Generate base content for a batch of tasks.
+        
+        Args:
+            df: Input DataFrame with tasks (typically from constraints.csv)
+            task_column: Name of column containing task descriptions
+            output_path: Optional path to save results
+            
+        Returns:
+            DataFrame with generated base content
+        """
+        if task_column not in df.columns:
+            raise ValueError(f"Column '{task_column}' not found in DataFrame")
+        
+        # Check if instruction_number exists
+        if "instruction_number" in df.columns:
+            has_instruction_num = True
+        else:
+            has_instruction_num = False
+            self.logger.warning("No 'instruction_number' column found, using index")
+        
+        self.logger.info(f"Generating base content for {len(df)} tasks")
+        
+        results = []
+        for idx, row in df.iterrows():
+            task = row[task_column]
+            instruction_num = row["instruction_number"] if has_instruction_num else idx + 1
+            
+            self.logger.info(f"Processing task #{instruction_num}")
+            
+            try:
+                content, tokens = self.generate_base_content(task, log=True)
+                
+                results.append({
+                    "instruction_number": instruction_num,
+                    "main_task": task,
+                    "base_content": content,
+                    "content_length": len(content),
+                    "model_used": self.model,
+                    "tokens_used": tokens,
+                    "temperature": self.temperature,
+                    "timestamp": datetime.now().isoformat()
+                })
+                
+            except Exception as e:
+                self.logger.error(
+                    f"Failed to generate base content for task {instruction_num}: {e}"
+                )
+                results.append({
+                    "instruction_number": instruction_num,
+                    "main_task": task,
+                    "base_content": "",
+                    "content_length": 0,
+                    "model_used": self.model,
+                    "tokens_used": 0,
+                    "temperature": self.temperature,
+                    "timestamp": datetime.now().isoformat()
+                })
+        
+        result_df = pd.DataFrame(results)
+        
+        if output_path:
+            result_df.to_csv(output_path, index=False, encoding="utf-8")
+            self.logger.info(f"Base content saved to {output_path}")
+        
+        return result_df
