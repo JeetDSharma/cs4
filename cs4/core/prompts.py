@@ -339,3 +339,17 @@ def get_evaluation_prompt(
 def get_merge_prompt() -> str:
     """Get the blog merge prompt."""
     return MERGE_PROMPT
+
+
+SUMMARIZATION_PROMPT = """Given the {content_type} post, rewrite a summarized version that is approximately {target_pct}% of the original length.
+Output only the summarized {content_type}, with no preamble or explanation."""
+
+
+def get_summarization_prompt(
+    content_type: str,
+    content: str,
+    target_length_pct: float = 0.25
+) -> str:
+    """Get the summarization prompt."""
+    target_pct = int(target_length_pct * 100)
+    return f"{SUMMARIZATION_PROMPT.format(content_type=content_type, target_pct=target_pct)}\n\n{content_type.capitalize()} to summarize:\n{content}"

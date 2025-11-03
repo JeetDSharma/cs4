@@ -10,6 +10,7 @@ from cs4.core.constraint_generator import ConstraintGenerator
 from cs4.core.constraint_expander import ConstraintExpander
 from cs4.core.base_generator import BaseGenerator
 from cs4.core.constraint_fitter import ConstraintFitter
+from cs4.core.content_summarizer import ContentSummarizer
 from cs4.core.evaluator import ConstraintEvaluator
 from cs4.core.blog_merger import BlogMerger
 from cs4.utils.llm_client import OpenAIClient, AnthropicClient
@@ -27,6 +28,7 @@ __all__ = [
     "ConstraintExpander",
     "BaseGenerator",
     "ConstraintFitter",
+    "ContentSummarizer",
     "ConstraintEvaluator",
     "BlogMerger",
     "OpenAIClient",
