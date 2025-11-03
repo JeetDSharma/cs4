@@ -22,8 +22,6 @@ class ConstraintFitter:
         llm_client: Optional[object] = None,
         model: str = None,
         content_type: str = "blog",
-        temperature: float = 0.7,
-        max_tokens: int = 4096,
         retry_attempts: int = 3,
         delay: float = 1.0
     ):
@@ -34,16 +32,12 @@ class ConstraintFitter:
             llm_client: LLM client (OpenAI or Anthropic)
             model: Model identifier
             content_type: Type of content (blog, story, news)
-            temperature: Generation temperature
-            max_tokens: Maximum tokens to generate
             retry_attempts: Number of retry attempts on failure
             delay: Delay in seconds between retries
         """
         self.llm_client = llm_client or OpenAIClient(log_usage=True)
         self.model = model or Config.DEFAULT_FITTING_MODEL
         self.content_type = content_type
-        self.temperature = temperature
-        self.max_tokens = max_tokens
         self.retry_attempts = retry_attempts
         self.delay = delay
         
@@ -83,8 +77,6 @@ class ConstraintFitter:
                             {"role": "user", "content": prompt}
                         ],
                         model=self.model,
-                        temperature=self.temperature,
-                        max_tokens=self.max_tokens
                     )
                     content = response.choices[0].message.content.strip()
                     tokens = response.usage.total_tokens
@@ -92,8 +84,6 @@ class ConstraintFitter:
                     response = self.llm_client.create_message(
                         messages=[{"role": "user", "content": prompt}],
                         model=self.model,
-                        max_tokens=self.max_tokens,
-                        temperature=self.temperature
                     )
                     content = response.content[0].text
                     tokens = response.usage.input_tokens + response.usage.output_tokens

@@ -7,6 +7,7 @@ constraint satisfaction across multiple domains (blogs, stories, news).
 
 # Expose key classes and functions at package level
 from cs4.core.constraint_generator import ConstraintGenerator
+from cs4.core.constraint_expander import ConstraintExpander
 from cs4.core.base_generator import BaseGenerator
 from cs4.core.constraint_fitter import ConstraintFitter
 from cs4.core.evaluator import ConstraintEvaluator
@@ -23,6 +24,7 @@ from cs4.schemas import (
 
 __all__ = [
     "ConstraintGenerator",
+    "ConstraintExpander",
     "BaseGenerator",
     "ConstraintFitter",
     "ConstraintEvaluator",
