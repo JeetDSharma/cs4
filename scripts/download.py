@@ -10,9 +10,9 @@ from urllib.parse import urlparse
 import requests
 from tqdm import tqdm
 
-from dolma.scripts.utils.config_loader import load_yaml, stamp, fill_vars
-from dolma.scripts.utils.log_utils import setup_logging, get_logger
-from dolma.scripts.utils.io_utils import ensure_dir
+from cs4.utils.config_loader import load_yaml, stamp, fill_vars
+from cs4.utils.log_utils import setup_logging, get_logger
+from cs4.utils.io_utils import ensure_dir
 
 
 RETRY_LIMIT_DEFAULT = 5
@@ -68,7 +68,7 @@ def download_one(url: str, out_dir: Path, retry: int, chunk_bytes: int, logger):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", required=True, help="Path to download_config.yaml")
-    ap.add_argument("--logging", default="dolma/configs/logging_config.yaml")
+    ap.add_argument("--logging", default="configs/logging_config.yaml")
     args = ap.parse_args()
 
     # Load configuration first
@@ -82,9 +82,9 @@ def main():
     ensure_dir(out_dir)
 
     # Set up per-job log file
-    job_log = logs_dir / "dolma_download.log"
+    job_log = logs_dir / "cs4_download.log"
     setup_logging(args.logging, job_log_file=job_log)
-    logger = get_logger("DolmaDownloader")
+    logger = get_logger("CS4Downloader")
 
     # Resolve parameters
     urls = load_urls(cfg["urls_file"])

@@ -11,9 +11,9 @@ from pathlib import Path
 from urllib.parse import urlparse
 from tqdm import tqdm
 
-from dolma.scripts.utils.config_loader import load_yaml, stamp, fill_vars
-from dolma.scripts.utils.log_utils import setup_logging, get_logger
-from dolma.scripts.utils.io_utils import ensure_dir
+from cs4.utils.config_loader import load_yaml, stamp, fill_vars
+from cs4.utils.log_utils import setup_logging, get_logger
+from cs4.utils.io_utils import ensure_dir
 
 
 # ---------- Blog URL Detection ----------
@@ -93,7 +93,7 @@ def parse_jsonl_to_csv(input_path: Path, writer: csv.DictWriter, logger, min_len
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", required=True, help="Path to parse_config.yaml")
-    ap.add_argument("--logging", default="dolma/configs/logging_config.yaml")
+    ap.add_argument("--logging", default="configs/logging_config.yaml")
     ap.add_argument("--vars", nargs="*", default=[], help="override vars like unzip_timestamp=20251007_141230_unzip")
     args = ap.parse_args()
 
@@ -109,9 +109,9 @@ def main():
     ensure_dir(output_csv.parent)
 
     # ---- Setup logging ----
-    job_log = logs_dir / "dolma_parse.log"
+    job_log = logs_dir / "cs4_parse.log"
     setup_logging(args.logging, job_log_file=job_log)
-    logger = get_logger("DolmaParser")
+    logger = get_logger("CS4Parser")
 
     # ---- Gather files ----
     if input_jsonl.is_dir():
