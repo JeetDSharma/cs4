@@ -1,6 +1,5 @@
 """
 Constraint generation module - extracts constraints from content.
-Converted from blog_generation_type2.ipynb
 """
 
 import pandas as pd
@@ -20,7 +19,7 @@ class ConstraintGenerator:
     def __init__(
         self,
         llm_client: Optional[object] = None,
-        model: str = "gpt-4-mini",
+        model: str = "gpt-4.1-mini",
         retry_attempts: int = 3,
         delay: float = 1.0
     ):
@@ -198,7 +197,7 @@ def generate_constraints(
     df: pd.DataFrame,
     chat_fn: Callable,
     system_prompt: str,
-    model: str = "gpt-4-mini",
+    model: str = "gpt-4.1-mini",
     output_path: str = "../data/constraints.csv",
     retry_attempts: int = 3,
     delay: float = 1.0
