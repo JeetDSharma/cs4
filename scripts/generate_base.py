@@ -51,18 +51,6 @@ def main():
         help="LLM provider"
     )
     parser.add_argument(
-        "--temperature",
-        type=float,
-        default=0.7,
-        help="Generation temperature"
-    )
-    parser.add_argument(
-        "--max-tokens",
-        type=int,
-        default=4096,
-        help="Maximum tokens to generate"
-    )
-    parser.add_argument(
         "--retry-attempts",
         type=int,
         default=3,
@@ -109,8 +97,6 @@ def main():
         llm_client=client,
         model=args.model,
         content_type=args.domain,
-        temperature=args.temperature,
-        max_tokens=args.max_tokens,
         retry_attempts=args.retry_attempts
     )
     
