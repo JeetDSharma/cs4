@@ -48,12 +48,8 @@ class UsageTracker:
                         by_provider[provider] = 0
                     by_provider[provider] += tokens
         
-        # Rough cost estimation (adjust based on actual pricing)
-        cost = (total_tokens * 0.0015) / 1000  # $0.0015 per 1K tokens
-        
         return {
             "total_tokens": total_tokens,
-            "cost": cost,
             "by_provider": by_provider
         }
 
@@ -72,17 +68,13 @@ class OpenAIClient:
     def chat_completion(
         self,
         messages: List[Dict[str, str]],
-        model: str = "gpt-4-mini",
-        temperature: float = 0.7,
-        max_tokens: int = 4096,
+        model: str = "gpt-4-mini",  
         **kwargs
     ) -> Any:
         """Create a chat completion."""
         response = self.client.chat.completions.create(
             model=model,
             messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
             **kwargs
         )
         
@@ -105,9 +97,7 @@ class OpenAIClient:
         self,
         system_prompt: str,
         user_message: str,
-        model: str = "gpt-4-mini",
-        temperature: float = 0.7,
-        max_tokens: int = 4096,
+        model: str = "gpt-4-mini"
         **kwargs
     ) -> str:
         """Simplified chat interface."""
@@ -118,8 +108,6 @@ class OpenAIClient:
         response = self.chat_completion(
             messages=messages,
             model=model,
-            temperature=temperature,
-            max_tokens=max_tokens,
             **kwargs
         )
         return self.get_response_text(response)
@@ -140,16 +128,12 @@ class AnthropicClient:
         self,
         messages: List[Dict[str, str]],
         model: str = "claude-3-sonnet-20240229",
-        max_tokens: int = 4096,
-        temperature: float = 0.7,
         system: Optional[str] = None,
         **kwargs
     ) -> Any:
         """Create a message."""
         response = self.client.messages.create(
             model=model,
-            max_tokens=max_tokens,
-            temperature=temperature,
             system=system,
             messages=messages,
             **kwargs
@@ -176,9 +160,7 @@ class AnthropicClient:
         self,
         system_prompt: str,
         user_message: str,
-        model: str = "claude-3-sonnet-20240229",
-        max_tokens: int = 4096,
-        temperature: float = 0.7,
+        model: str = "claude-3-sonnet-20240229"
         **kwargs
     ) -> str:
         """Simplified chat interface."""
@@ -186,8 +168,6 @@ class AnthropicClient:
         response = self.create_message(
             messages=messages,
             model=model,
-            max_tokens=max_tokens,
-            temperature=temperature,
             system=system_prompt,
             **kwargs
         )
