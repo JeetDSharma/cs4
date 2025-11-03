@@ -1,4 +1,4 @@
-# CS4: Constraint-Satisfaction for Creative Content
+# CS4: Measuring the Creativity of Large Language Models Automatically by Controlling the Number of Story-Writing Constraints
 
 A modular framework for evaluating LLM creativity through structured constraint satisfaction across multiple domains (blogs, stories, news).
 
