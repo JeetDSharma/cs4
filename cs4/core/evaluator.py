@@ -148,6 +148,13 @@ class ConstraintEvaluator:
             has_instruction_num = False
             self.logger.warning("No 'instruction_number' column found, using index")
         
+        # Check for subset_size column (from bucketed constraints)
+        has_subset_size = "subset_size" in df.columns
+        if has_subset_size:
+            self.logger.info("Using 'subset_size' column for constraint count")
+        else:
+            self.logger.info("No 'subset_size' column found, will parse constraints with regex")
+        
         self.logger.info(f"Evaluating {len(df)} samples")
         
         results = []
@@ -165,8 +172,12 @@ class ConstraintEvaluator:
                     log=True
                 )
                 
-                # Count total constraints
-                total_constraints = len(re.findall(r'^\d+\.', constraints, re.MULTILINE))
+                # Count total constraints - use subset_size if available, otherwise parse
+                if has_subset_size:
+                    total_constraints = int(row["subset_size"])
+                else:
+                    total_constraints = len(re.findall(r'^\d+\.', constraints, re.MULTILINE))
+                
                 satisfaction_rate = num_satisfied / total_constraints if total_constraints > 0 else 0.0
                 
                 results.append({
@@ -186,14 +197,19 @@ class ConstraintEvaluator:
                 self.logger.error(
                     f"Failed to evaluate sample {instruction_num}: {e}"
                 )
+                # Get total_constraints even in error case
+                if has_subset_size:
+                    error_total_constraints = int(row["subset_size"])
+                else:
+                    error_total_constraints = len(re.findall(r'^\d+\.', constraints, re.MULTILINE))
+                
                 results.append({
                     "instruction_number": instruction_num,
                     "fitted_content": content,
                     "constraints": constraints,
                     "satisfaction_results": "",
                     "num_satisfied": 0,
-                    "total_constraints": 0,
-                    "satisfaction_rate": 0.0,
+                    "total_constraints": error_total_constraints,
                     "model_used": self.model,
                     "tokens_used": 0,
                     "timestamp": datetime.now().isoformat()
