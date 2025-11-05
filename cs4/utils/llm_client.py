@@ -131,15 +131,23 @@ class AnthropicClient:
         messages: List[Dict[str, str]],
         model: str = "claude-3-sonnet-20240229",
         system: Optional[str] = None,
+        max_tokens: int = 4096,
         **kwargs
     ) -> Any:
         """Create a message."""
-        response = self.client.messages.create(
-            model=model,
-            system=system,
-            messages=messages,
+        # Build parameters dict
+        params = {
+            "model": model,
+            "max_tokens": max_tokens,
+            "messages": messages,
             **kwargs
-        )
+        }
+        
+        # Only add system if provided
+        if system is not None:
+            params["system"] = system
+        
+        response = self.client.messages.create(**params)
         
         if self.log_usage:
             # Anthropic usage is in response.usage
