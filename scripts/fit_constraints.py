@@ -6,6 +6,10 @@ CLI script for fitting content to constraints.
 import argparse
 import sys
 from pathlib import Path
+
+# Add project root to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import pandas as pd
 
 from cs4.core.constraint_fitter import ConstraintFitter
@@ -55,6 +59,11 @@ def main():
         type=int,
         default=3,
         help="Number of retry attempts on failure"
+    )
+    parser.add_argument(
+        "--constraint-column",
+        default="selected_constraints",
+        help="Column name containing constraints in the constraints CSV"
     )
     parser.add_argument(
         "--logging-config",
