@@ -6,10 +6,12 @@ Scans one or more Dolma JSONL files, extracts genuine blog posts,
 and merges them into a single CSV file.
 """
 
-import argparse, csv, json, re
+import argparse, csv, json, re, sys
 from pathlib import Path
 from urllib.parse import urlparse
 from tqdm import tqdm
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from cs4.utils.config_loader import load_yaml, stamp, fill_vars
 from cs4.utils.log_utils import setup_logging, get_logger

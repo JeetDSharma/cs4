@@ -7,6 +7,9 @@ Ensures all pairs are distinct - no blog appears in multiple pairs.
 import argparse
 import sys
 import os
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from cs4.config import Config
 from cs4.utils.embedding_utils import (
@@ -14,7 +17,6 @@ from cs4.utils.embedding_utils import (
     find_dissimilar_pairs_distinct,
     save_pairs_to_csv
 )
-
 
 def main():
     parser = argparse.ArgumentParser(

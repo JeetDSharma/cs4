@@ -6,13 +6,14 @@ CLI script for base content generation.
 import argparse
 import sys
 from pathlib import Path
-import pandas as pd
 
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+import pandas as pd
 from cs4.core.base_generator import BaseGenerator
 from cs4.utils.llm_client import OpenAIClient, AnthropicClient, get_total_usage
 from cs4.utils.log_utils import setup_logging, get_logger
 from cs4.config import Config
-
 
 def main():
     parser = argparse.ArgumentParser(

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-import argparse, concurrent.futures
+import argparse, concurrent.futures, sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from dolma.scripts.utils.config_loader import load_yaml, stamp, fill_vars
 from dolma.scripts.utils.log_utils import setup_logging, get_logger
 from dolma.scripts.utils.io_utils import ensure_dir, decompress_gz, decompress_zst
-
 
 def decompress_file(src: Path, out_dir: Path, logger, delete_src: bool):
     if src.suffix not in {".zst", ".gz"}:

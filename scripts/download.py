@@ -7,13 +7,13 @@ import time
 from pathlib import Path
 from urllib.parse import urlparse
 
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 import requests
 from tqdm import tqdm
-
 from cs4.utils.config_loader import load_yaml, stamp, fill_vars
 from cs4.utils.log_utils import setup_logging, get_logger
 from cs4.utils.io_utils import ensure_dir
-
 
 RETRY_LIMIT_DEFAULT = 5
 CHUNK_SIZE_MB = 1
