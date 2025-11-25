@@ -66,6 +66,18 @@ def main():
         default=None,
         help=f"Directory to cache embeddings (default: {Config.OUTPUTS_DIR} from config)"
     )
+    parser.add_argument(
+        "--min-words",
+        type=int,
+        default=None,
+        help="Minimum word count per blog text (optional)"
+    )
+    parser.add_argument(
+        "--max-words",
+        type=int,
+        default=None,
+        help="Maximum word count per blog text (optional)"
+    )
     
     args = parser.parse_args()
     
@@ -73,6 +85,8 @@ def main():
     print(f"Input: {args.input_path}")
     print(f"Output: {args.output_path}")
     print(f"Max size: {args.max_size}")
+    if args.min_words is not None or args.max_words is not None:
+        print(f"Word count filter: min={args.min_words}, max={args.max_words}")
     
     # Validate input file exists
     if not os.path.exists(args.input_path):
@@ -85,7 +99,9 @@ def main():
             file_path=args.input_path,
             max_size=args.max_size,
             model_name=args.model,
-            cache_dir=args.cache_dir
+            cache_dir=args.cache_dir,
+            min_words=args.min_words,
+            max_words=args.max_words
         )
         
         # Find dissimilar pairs (ensuring distinct pairs)
