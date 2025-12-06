@@ -17,11 +17,11 @@ Your task has two parts:
    - Constraints must strictly pertain to the content, ideas, arguments, or narrative direction of the blog and should influence how the blog develops.
    - If (and only if) you cannot write 39 atomic, content-based constraints, give stylistic constraints based on how the blog is written (tone, use of examples, formatting, etc.).
    - Write all constraints in the form of instructions. For example: "The blog should include practical tips."
-   - Do not write constraints in the same order or phrasing as the blog text. Randomize the order of the constraints.
+   - CRITICAL RANDOMIZATION STEP: You must disrupt the chronological flow. To do this, strictly follow this pattern: Write your first constraint about the conclusion of the blog. Write your second constraint about the introduction. Write your third constraint about the middle. Continue jumping back and forth across the timeline of the narrative for all 39 constraints. The final list must feel completely scrambled with no narrative arc.
 
 Here is a worked example to guide you:
 
-Input Blog:
+Input Blog: 
 Working from home has become the new normal for millions of professionals worldwide. While it offers flexibility and eliminates commutes, it also presents unique challenges that can impact both productivity and well-being.
 
 To optimize your home workspace, start by creating a dedicated area free from distractions. This space should have good lighting, comfortable seating, and all necessary equipment within reach. Many experts recommend facing a window for natural light, which can boost mood and energy levels.
@@ -81,13 +81,108 @@ Constraints:
 Now use the same approach for the next input blog.
 """
 
+# CONSTRAINT_GENERATION_PROMPT = """You are a writing expert. I will give you a blog as input.  
+# You can assume that a large language model created the blog.
+
+# Your task has two parts:
+
+# 1. Identify the main task of the blog in one sentence.
+#    Phrase it as an instruction.
+#    Example: "Write a blog about strategies for successful remote working."
+
+# 2. Generate a set of thirty nine constraints that a writer could follow to create a new blog that covers the same central ideas, structure, and reasoning as the input without recreating the original text.
+
+# Rules for the constraints:
+
+# 1. Constraints must be atomic. Each constraint must contain exactly one requirement.  
+# 2. Avoid all proper nouns. Do not use names of people, cities, courts, organizations, or case titles.  
+# 3. Avoid constraints that simply restate one sentence or one paragraph. Each constraint must influence at least two sentences in different parts of the blog.  
+# 4. Constraints must not allow reconstruction of the original blog. Do not follow the blog order. Do not outline the events in sequence.  
+# 5. Constraints must mix the following types:  
+#    a. Content constraints about ideas or arguments that should appear.  
+#    b. Structural constraints describing how the blog should be organized.  
+#    c. Reasoning constraints that require inference or comparison.  
+#    d. Stylistic constraints only if needed to reach thirty nine items.  
+# 6. Constraints must reflect realistic settings.  
+# 7. Constraints must span multiple parts of the blog whenever possible.  
+# 8. Do not copy phrases from the input.  
+# 9. Write all constraints as instructions that begin with "The blog should".  
+# 10. Randomize the order so the list does not follow the blog structure.
+
+# If and only if you cannot reach thirty nine atomic content and structure constraints, fill the remaining slots with stylistic constraints that describe tone or level of detail.
+
+# Output format:
+
+# Main Task: <one sentence instruction>
+
+# Constraints:
+# 1. <constraint one>
+# 2. <constraint two>
+# ...
+# 39. <constraint thirty nine>
+
+
+# FEW SHOT EXAMPLE ONE  
+
+# Input Blog:
+# Working from home has become common worldwide and while it brings flexibility it also brings challenges. A well planned workspace can reduce distractions. Clear working hours help protect personal time. Regular breaks prevent burnout. Staying connected with colleagues reduces feelings of isolation. Caring for health through exercise, good sleep, and mindful habits supports long term productivity.
+
+# Output:
+# Main Task: Write a blog about strategies for successful remote working.
+
+# Constraints:
+# 1. The blog should explain the value of defined working hours.
+# 2. The blog should describe why regular breaks sustain performance.
+# 3. The blog should connect poor boundaries to loss of personal time.
+# 4. The blog should emphasize how social connection reduces isolation.
+# 5. The blog should show how workspace planning limits distractions.
+# 6. The blog should describe how exercise supports mental clarity.
+# 7. The blog should mention that hydration influences daily focus.
+# 8. The blog should link sleep quality to sustained productivity.
+# 9. The blog should identify productivity as a central theme.
+# 10. The blog should explain how mindful habits reduce stress.
+# 11. The blog should show how good lighting supports energy.
+# 12. The blog should discuss how essential tools should be accessible.
+# 13. The blog should encourage informal digital conversations.
+# 14. The blog should contrast benefits and challenges of remote work.
+# 15. The blog should explain how nutrition influences cognitive strength.
+# 16. The blog should advise keeping a consistent daily routine.
+# 17. The blog should connect emotional well being to job performance.
+# 18. The blog should describe a structured time management method.
+# 19. The blog should argue that remote work requires deliberate planning.
+# 20. The blog should promote stretching or movement during pauses.
+# 21. The blog should discuss the importance of sleep hygiene.
+# 22. The blog should connect hydration to reduced fatigue.
+# 23. The blog should recommend a physically separate workspace.
+# 24. The blog should explain how interruptions reduce productivity.
+# 25. The blog should suggest instant messaging for quick collaboration.
+# 26. The blog should mention that natural light boosts mood.
+# 27. The blog should emphasize consistency in work boundaries.
+# 28. The blog should mention virtual team bonding activities.
+# 29. The blog should argue for intentional self care routines.
+# 30. The blog should tie physical comfort to long term health.
+# 31. The blog should combine workspace, schedule, and health advice into a unified approach.
+# 32. The blog should recommend communicating work hours to household members.
+# 33. The blog should encourage readers to adopt concrete changes.
+# 34. The blog should warn that poor boundaries cause personal time erosion.
+# 35. The blog should highlight how home work flexibility introduces new challenges.
+# 36. The blog should advise placing water near the workspace.
+# 37. The blog should discuss how visual cues help create a work zone.
+# 38. The blog should promote balanced nutrition for sustained energy.
+# 39. The blog should conclude by urging a proactive approach to remote work.
+
+
+
+
+# Now apply this full process to the next input blog.
+# """
 
 BASE_GENERATION_PROMPT = """You are a creative writing expert. I will give you a task description, and you need to generate {content_type} content that fulfills the task.
 
 The content should be:
 - Well-structured and coherent
 - Engaging and creative
-- Of appropriate length (aim for 500-1500 words)
+- Of appropriate length (aim for 400 words)
 - Natural and authentic in tone
 
 Generate the {content_type} based on the following task:
@@ -99,11 +194,13 @@ CONSTRAINT_FITTING_PROMPT = """You are a creative writing expert. I will give yo
 2. Base {content_type} content
 3. A list of 39 constraints
 
-Your job is to revise and expand the base content to satisfy ALL 39 constraints while maintaining coherence, quality, and natural flow.
+Your job is to revise and expand the base content to satisfy the constraints while maintaining coherence, quality, and natural flow. Restrict the length of output to 500 words.
 
 Instructions:
 - Keep the core ideas from the base content
-- Integrate all 39 constraints seamlessly
+- Integrate constraints seamlessly where they fit naturally
+- Prioritize natural flow and readability over satisfying every single constraint
+- It is acceptable to skip constraints if they force the writing to be awkward
 - Maintain a natural, engaging writing style
 - Ensure the content flows logically
 - Do not mention the constraints explicitly in the content
@@ -283,6 +380,86 @@ Constraints:
 Output:
 """
 
+CONSTRAINT_FITTING_PROMPT_LENGTH_500 = """You are a writing expert. I am going to give you a blog as an input. 
+You can assume that a large language model (LLM) generated the blog. Restrict the length of output to be less than 500 words.
+
+Your task has two parts:
+1. Identify the main task of the blog in one sentence. 
+   - For example: "The main task is to write a blog about strategies for successful remote working."
+   - Phrase the main task as an instruction.
+2. Generate a set of 39 free-form constraints that you think might have been given to the LLM to generate the blog.
+   - DO NOT REPEAT CONSTRAINTS.
+   - Constraints must be atomic (a single indivisible condition). If a constraint can be broken into smaller constraints, do so.
+   - Avoid proper nouns in your constraints.
+   - Constraints should drive at least a few sentences in the blog (do not write constraints that map to only one line).
+   - Constraints must strictly pertain to the content, ideas, arguments, or narrative direction of the blog and should influence how the blog develops.
+   - If (and only if) you cannot write 39 atomic, content-based constraints, give stylistic constraints based on how the blog is written (tone, use of examples, formatting, etc.).
+   - Write all constraints in the form of instructions. For example: "The blog should include practical tips."
+   - Do not write constraints in the same order or phrasing as the blog text. Randomize the order of the constraints.
+
+Here is a worked example to guide you:
+
+Input Blog:
+Working from home has become the new normal for millions of professionals worldwide. While it offers flexibility and eliminates commutes, it also presents unique challenges that can impact both productivity and well-being.
+
+To optimize your home workspace, start by creating a dedicated area free from distractions. This space should have good lighting, comfortable seating, and all necessary equipment within reach. Many experts recommend facing a window for natural light, which can boost mood and energy levels.
+
+Establish clear boundaries between work and personal time. Set specific work hours and stick to them, just as you would in an office. Communicate these boundaries to family members or housemates to minimize interruptions during work hours.
+
+Take regular breaks throughout the day. The Pomodoro Technique, which involves 25-minute focused work sessions followed by 5-minute breaks, can help maintain concentration and prevent burnout. Use break time to stretch, hydrate, or take a short walk.
+
+Stay connected with colleagues through regular video calls and instant messaging. This helps maintain team cohesion and prevents feelings of isolation. Schedule virtual coffee breaks or team-building activities to foster relationships.
+
+Finally, prioritize your physical and mental health. Maintain a regular exercise routine, eat nutritious meals, and get adequate sleep. Consider meditation or mindfulness practices to manage stress and maintain focus.
+
+Output:
+Main Task: Write a blog about strategies for successful remote working.
+
+Constraints:
+1. Require the setting of defined working hours.
+2. Explain the risks of isolation if connection practices are neglected.
+3. Warn about the risk of burnout without intentional self-care.
+4. Explain how the removal of commuting affects time use and daily rhythm.
+5. Suggest strategies for maintaining healthy eating while at home.
+6. Emphasize reducing environmental distractions in that space.
+7. Argue for the necessity of regular breaks during the workday.
+8. Encourage informal online gatherings to maintain rapport.
+9. Recommend mindfulness or meditation as stress-management tools.
+10. Stress the value of adhering consistently to those hours.
+11. Show how workspace ergonomics (chair, desk) influence long-term health.
+12. Conclude with a call to action urging readers to adopt concrete changes immediately.
+13. Link exercise directly to improved cognitive performance and focus.
+14. Establish remote work as a global trend that has transformed professional life.
+15. Connect emotional well-being to overall job performance and satisfaction.
+16. Explain how balanced nutrition influences concentration and resilience.
+17. Emphasize communicating work schedules to others in the household.
+18. Identify productivity as a central theme in remote work discussions.
+19. Recommend scheduled video calls to replicate face-to-face connection.
+20. Recommend creating a physically separate space for work at home.
+21. Stress the need for essential tools and equipment to be easily accessible.
+22. Recommend light physical movement or stretching during pauses.
+23. Integrate workspace, scheduling, health, and social practices into a unified remote-work strategy.
+24. Stress the importance of sleep in sustaining energy and productivity.
+25. Highlight the role of hydration and snacks in sustaining energy across breaks.
+26. Suggest environmental cues (like décor or layout) that reinforce the sense of a work zone.
+27. Describe the importance of adequate lighting for focus and energy.
+28. Introduce one structured time-management method, such as work intervals.
+29. Show how mental health practices support long-term work sustainability.
+30. Show how shared rituals (e.g., virtual coffee breaks) strengthen belonging.
+31. Highlight well-being as equally important alongside productivity.
+32. Warn about the risk of personal time erosion without such boundaries.
+33. Contrast the flexibility of remote work with the new challenges it creates.
+34. Suggest instant messaging as a tool for quick, ongoing collaboration.
+35. Highlight how a clear boundary between workspace and leisure areas aids focus.
+36. Show how enforcing those boundaries prevents interruptions.
+37. Recommend establishing a routine for daily physical exercise.
+38. Explain how breaks counteract mental fatigue and sustain performance.
+39. Stress that remote work requires deliberate maintenance of social contact.
+
+Now use the same approach for the next input blog.
+"""
+
+
 
 MERGE_PROMPT = """You are a professional editor. Merge the two blogs below into a single coherent blog post.
 
@@ -296,6 +473,196 @@ Requirements:
 
 Output only the merged blog text, with no preamble or explanation."""
 
+# COMMON_SUMMARY_PROMPT = """
+# You will be given prompts A and B. Your task is to generate a prompt C where prompt C is implied by BOTH prompt A and prompt B. This means every detail in prompt C is directly mentioned in BOTH prompt A and B. Your prompt C should be as concise as possible with the following caveats: the more similar prompt A and B are too each other, the longer prompt C should be as it would include more details common to both prompt A and B. The more broad prompt A and B are, the more concise and general your prompt C should be. If your prompt A and B are so general, instead of summarizing prompt A and B, find a one sentence category that encapsulates the two prompts that includes the medium and the topic the user requests. Begin your prompt C with "(start)" and end it with "(end)."
+# 1. (Dissimilar – Writing vs Poetry)
+# Prompt A:
+# "Write a detailed book review (800–1000 words) of George Orwell’s 1984. Focus on Orwell’s use of language, the historical context of the novel, and its relevance to modern surveillance culture. Please organize the review into an introduction, several analytical sections, and a concluding evaluation."
+# Prompt B:
+# "Compose a 12-stanza poem in free verse about a traveler crossing a desert, emphasizing themes of endurance, loneliness, and the harsh beauty of nature. Use vivid imagery and avoid rhyme schemes."
+# Prompt C:
+# (start) Write about themes. (end)
+# 2. (Dissimilar – Coding in Different Languages)
+# Prompt A:
+# "Can you implement a Python script that scrapes product data from an e-commerce website (like titles, prices, and availability) using BeautifulSoup? Please also save the data into a CSV file with properly labeled columns."
+# Prompt B:
+# "I’d like a C++ program that simulates a basic banking system, allowing users to create accounts, deposit money, withdraw money, and view balances. The program should be menu-driven and use object-oriented design."
+# Prompt C:
+# (start) Write a program. (end)
+# 3. (Moderately Similar – Writing)
+# Prompt A:
+# "Write a 2,000-word research paper about how social media influences political polarization in the United States. Discuss both positive and negative effects, provide examples from the past decade, and include at least five scholarly sources formatted in APA style."
+# Prompt B:
+# "Create a detailed argumentative essay about how modern technology (including social media, smartphones, and online forums) affects democracy. Focus on both risks and opportunities, use evidence from real-world examples, and cite at least three academic sources."
+# Prompt C:
+# (start) Write an essay on how social media affects politics and democracy, addressing both risks and benefits and including academic sources. (end)
+# 4. (Moderately Similar – Coding)
+# Prompt A:
+# "Please create a Python script that takes a CSV file of sales transactions and generates summary statistics, including total revenue, average order value, and number of unique customers. Output the results to the terminal and also save them to a new CSV file."
+# Prompt B:
+# "Can you write a Python program that reads data from a JSON file containing customer purchases, calculates metrics like total sales and number of customers, and then produces a summary report saved to a text file?"
+# Prompt C:
+# (start) Write a Python script that reads purchase data, calculates total sales and customer counts, and outputs a summary report. (end)
+# 5. (Very Similar – Writing)
+# Prompt A:
+# "Draft a 1,200-word persuasive essay arguing why renewable energy should replace fossil fuels as the dominant global energy source. The essay should include an introduction, three body sections (environmental benefits, economic advantages, and long-term sustainability), and a conclusion. Use real-world data and cite at least three credible sources."
+# Prompt B:
+# "Please write a well-structured essay, around 1,200 words, making the case for transitioning from fossil fuels to renewable energy. Discuss the environmental necessity, economic opportunities, and sustainable future benefits. Provide at least three reliable citations and organize the essay with intro, body, and conclusion."
+# Prompt C:
+# (start) Write a 1,200-word essay on why renewable energy should replace fossil fuels, discussing environmental benefits, economic advantages, and sustainability. Include at least three credible sources, with a structured introduction, body, and conclusion. (end)
+# 6. (Very Similar – Coding)
+# Prompt A:
+# "Write a Python program that implements a REST API using Flask. The API should support basic CRUD operations for a task management app, including creating tasks, listing tasks, updating tasks, and deleting tasks. Store tasks in an in-memory dictionary for simplicity, and return JSON responses with appropriate HTTP status codes. Include comments and error handling."
+# Prompt B:
+# "I need a Python REST API built with Flask that can handle a simple to-do list. It should let users create tasks, retrieve all tasks, update them, and delete them. Use a dictionary to store tasks (no database needed), respond with JSON, and make sure to handle errors gracefully. Please comment the code clearly."
+# Prompt C:
+# (start) Write a Python REST API using Flask for a to-do app with CRUD operations, storing tasks in a dictionary, returning JSON responses, and including error handling and comments. (end)
+# Example 7
+# Prompt A (generalized)
+# Write about how different programming paradigms influence the way developers design and structure their code. Discuss the benefits and drawbacks of these approaches and how they affect maintainability and performance.
+# Prompt B (generalized)
+# Explain how programming paradigms shape software development. Highlight the trade-offs each paradigm brings and how they influence scalability and readability.
+# Prompt C (very broad)
+# (start) Write about how programming paradigms affect software design and development. (end)
+# Example 8
+# Prompt A (generalized)
+# Discuss the impact of artificial intelligence on fields traditionally driven by humans. Include opportunities, risks, and ethical implications.
+# Prompt B (generalized)
+# Write about the role of AI in human-centered domains, focusing on how it changes processes, raises ethical questions, and creates new forms of collaboration.
+# Prompt C (very broad)
+# (start) Write about the influence of AI on human-driven fields and its ethical implications. (end)
+# Example 9
+# Prompt A (generalized)
+# Explain methods that improve software reliability, focusing on techniques for finding and fixing errors in code.
+# Prompt B (generalized)
+# Write about practices that enhance code quality, particularly approaches to identifying problems and ensuring correctness.
+# Prompt C (very broad)
+# (start) Write about techniques for improving code quality and reliability. (end)
+# Example 10
+# Prompt A (highly abstracted)
+# Write about how different approaches to problem solving affect outcomes in technology and society.
+# Prompt B (highly abstracted)
+# Explain how methodologies shape the way humans build systems and solve challenges.
+# Prompt C (extremely broad)
+# (start) Write about how approaches influence outcomes. (end)
+# Example 11
+# Prompt A (highly abstracted)
+# Discuss the role of emerging technologies in reshaping human activity, including benefits and challenges.
+# Prompt B (highly abstracted)
+# Write about how innovations impact the way people live and work, considering risks and opportunities.
+# Prompt C (extremely broad)
+# (start) Write about how technology influences human activity. (end)
+# Example 12
+# Prompt A (highly abstracted)
+# Explain how humans improve the systems they create to make them more effective and reliable.
+# Prompt B (highly abstracted)
+# Write about methods for refining processes to achieve better performance and consistency.
+# Prompt C (extremely broad)
+# (start) Write about how humans refine systems to improve them. (end)
+# Example 13
+# Prompt A:
+# Write a poem that reflects on natural landscapes, using imagery and metaphor to highlight the relationship between humans and the environment.
+# Prompt B:
+# Compose a poem exploring the power of nature, focusing on themes of transformation, resilience, and human connection to the earth.
+# Prompt C:
+# (start)Poem on Nature(end)
+# Example 14
+# Prompt A:
+# Write an essay examining how revolutions throughout history have transformed societies, paying attention to causes, consequences, and cultural shifts.
+# Prompt B:
+# Compose a structured essay analyzing historical uprisings, their impact on leadership, governance, and social identity.
+# Prompt C:
+# (start)Essay on Revolutions(end)
+# Example 15
+# Prompt A:
+# Write a program that processes user input, applies logical conditions, and outputs meaningful results, ensuring clear structure and readability.
+# Prompt B:
+# Compose code that implements basic algorithms with input handling, decision-making, and structured output, emphasizing clarity and functionality.
+# Prompt C:
+# (start)Code on Input Processing(end)
+# Now carry out this task and output a prompt C with the following prompts A & B:
+# Prompt A: {story1}
+# Prompt B: {story2} 
+# """
+
+COMMON_CONSTRAINT_GENERATION_PROMPT = """You are a writing expert. You will be given two blogs (Blog A and Blog B) as input.
+You can assume that a large language model (LLM) generated each blog.
+
+Your task has two parts:
+1. Identify a common main task that applies to BOTH blogs.
+   - The main task must be implied by BOTH Blog A and Blog B — every detail in the task must be directly present in both blogs.
+   - The more similar the blogs, the more specific the main task can be.
+   - The more dissimilar the blogs, the more general the main task should be.
+   - Phrase the main task as an instruction. Example: "Write a blog about strategies for successful remote working."
+
+2. Generate a set of 39 free-form constraints that apply to BOTH blogs.
+   - Each constraint must be satisfied by BOTH Blog A and Blog B.
+   - DO NOT REPEAT CONSTRAINTS.
+   - Constraints must be atomic (a single indivisible condition). If a constraint can be broken into smaller constraints, do so.
+   - Avoid proper nouns in your constraints.
+   - Constraints should drive at least a few sentences in both blogs (do not write constraints that map to only one line).
+   - Constraints must strictly pertain to the content, ideas, arguments, or narrative direction and should influence how the blogs develop.
+   - The more similar the blogs, the more specific and detailed the constraints should be.
+   - The more dissimilar the blogs, the more general and abstract the constraints should be (e.g., "Include a conclusion" or "Use examples").
+   - If the blogs are so dissimilar that you cannot find 39 content-based constraints, give stylistic constraints based on how both blogs are written (tone, use of examples, formatting, etc.).
+   - Write all constraints in the form of instructions. Example: "The blog should include practical tips."
+   - CRITICAL RANDOMIZATION STEP: Disrupt chronological flow. Write your first constraint about conclusions, second about introductions, third about middles. Continue jumping across the timeline. The final list must feel completely scrambled.
+
+Here are examples showing how similarity affects output:
+
+Example 1 (Dissimilar Blogs):
+Blog A: A technical blog about Python web scraping with BeautifulSoup, including code examples and CSV export.
+Blog B: A narrative blog about traveling through the Amazon rainforest, focusing on wildlife encounters.
+
+Main Task: Write a blog that provides detailed information on a topic.
+
+Constraints:
+1. End with a summary or concluding thought.
+2. Open with an introduction that establishes the topic.
+3. Include specific examples to illustrate points.
+4. Maintain a clear and organized structure.
+5. Use descriptive language to engage the reader.
+... (remaining constraints would be similarly general)
+
+Example 2 (Very Similar Blogs):
+Blog A: A blog about remote work productivity, discussing workspace setup, time management with Pomodoro, and work-life boundaries.
+Blog B: A blog about working from home effectively, covering dedicated workspace creation, scheduled breaks, and separating work from personal time.
+
+Main Task: Write a blog about strategies for successful remote working.
+
+Constraints:
+1. Conclude with a call to action urging readers to implement changes.
+2. Establish remote work as a significant trend in professional life.
+3. Recommend creating a dedicated workspace at home.
+4. Emphasize reducing distractions in the work environment.
+5. Argue for the importance of regular breaks during work.
+6. Recommend a structured time-management approach.
+7. Stress setting clear boundaries between work and personal time.
+8. Suggest communicating work schedules to household members.
+... (remaining constraints would be similarly specific)
+
+Now apply this approach to the following two blogs:
+
+Blog A:
+{blog1}
+
+Blog B:
+{blog2}
+
+Output Format:
+Main Task: [one sentence instruction]
+
+Constraints:
+1. [constraint]
+2. [constraint]
+...
+39. [constraint]
+"""
+
+
+def get_common_constraint_generation_prompt() -> str:
+    """Get the common constraint generation prompt."""
+    return COMMON_CONSTRAINT_GENERATION_PROMPT
 
 def get_constraint_generation_prompt() -> str:
     """Get the constraint generation prompt."""
