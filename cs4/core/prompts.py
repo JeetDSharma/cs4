@@ -720,3 +720,73 @@ def get_summarization_prompt(
     """Get the summarization prompt."""
     target_pct = int(target_length_pct * 100)
     return f"{SUMMARIZATION_PROMPT.format(content_type=content_type, target_pct=target_pct)}\n\n{content_type.capitalize()} to summarize:\n{content}"
+
+
+CONSTRAINT_REPLACEMENT_PROMPT = """You are a writing expert. You are given:
+1. A main task
+2. A set of 39 constraints for that task
+3. A base story/blog written for that task
+4. Evaluation results showing which constraints are already satisfied by the base content
+
+Your job is to create a REVISED set of 39 constraints by replacing the constraints that are already satisfied (marked "Yes") with NEW, HARDER constraints that are NOT satisfied by the base content.
+
+Only Output the revised constraints, with no preamble or explanation.
+
+Requirements for replacement constraints:
+- Must be relevant to the same main task
+- Must NOT be satisfied by the current base content
+- Should require significant modification to satisfy
+- Must be atomic (single indivisible condition)
+- Must be content-based (not just stylistic)
+- Should maintain overall coherence with kept constraints
+
+Instructions:
+1. Keep the main task EXACTLY the same
+2. Keep all constraints marked "No" (not satisfied) unchanged
+3. Replace all constraints marked "Yes" (satisfied) with new, harder constraints
+4. Ensure you still have exactly 39 constraints total
+5. Number the revised constraints 1-39
+6. Randomize the order (don't put all new constraints at the end)
+
+Output Format:
+Main Task: [same as original]
+
+Revised Constraints:
+1. [constraint - either kept from original or new replacement]
+2. [constraint]
+...
+39. [constraint]
+
+---
+
+Input:
+
+Main Task: {main_task}
+
+Original Constraints:
+{original_constraints}
+
+Base Content:
+{base_content}
+
+Evaluation Results (Yes = satisfied, No = not satisfied):
+{satisfaction_results}
+
+Output:
+"""
+
+
+def get_constraint_replacement_prompt(
+    main_task: str,
+    original_constraints: str,
+    base_content: str,
+    satisfaction_results: str
+) -> str:
+    """Get the constraint replacement prompt."""
+    return CONSTRAINT_REPLACEMENT_PROMPT.format(
+        main_task=main_task,
+        original_constraints=original_constraints,
+        base_content=base_content,
+        satisfaction_results=satisfaction_results
+    )
+
