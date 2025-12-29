@@ -109,15 +109,19 @@ class ConstraintFitter:
         self,
         constraints_df: pd.DataFrame,
         base_df: pd.DataFrame,
-        output_path: Optional[str] = None
+        output_path: Optional[str] = None,
+        base_column: str = "base_content",
+        constraint_column: str = "constraints"
     ) -> pd.DataFrame:
         """
         Fit base content to constraints for a batch of samples.
         
         Args:
-            constraints_df: DataFrame with constraints (from constraints.csv)
-            base_df: DataFrame with base content (from base_generated.csv)
+            constraints_df: Constraints (from constraints.csv)
+            base_df: Base content (from base_generated.csv)
             output_path: Optional path to save results
+            base_column: Column name containing base content (default: "base_content")
+            constraint_column: Column name containing constraints (default: "constraints")
             
         Returns:
             DataFrame with fitted content
@@ -143,8 +147,30 @@ class ConstraintFitter:
             
             # Extract fields (handle suffix conflicts)
             task = row.get("main_task_constraint", row.get("main_task", ""))
-            constraints = row["constraints"]
-            base_content = row["base_content"]
+            
+            # Try to get constraints with the specified column name
+            if constraint_column in row:
+                constraints = row[constraint_column]
+            elif f"{constraint_column}_constraint" in row:
+                constraints = row[f"{constraint_column}_constraint"]
+            elif "constraints" in row:
+                constraints = row["constraints"]
+            elif "constraints_constraint" in row:
+                constraints = row["constraints_constraint"]
+            else:
+                raise ValueError(f"Could not find constraint column '{constraint_column}' in merged dataframe")
+            
+            # Try to get base content with the specified column name
+            if base_column in row:
+                base_content = row[base_column]
+            elif f"{base_column}_base" in row:
+                base_content = row[f"{base_column}_base"]
+            elif "base_content" in row:
+                base_content = row["base_content"]
+            elif "base_content_base" in row:
+                base_content = row["base_content_base"]
+            else:
+                raise ValueError(f"Could not find base content column '{base_column}' in merged dataframe")
             
             self.logger.info(f"Processing sample #{instruction_num}")
             

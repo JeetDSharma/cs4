@@ -8,6 +8,7 @@ from cs4.core.constraint_fitter import ConstraintFitter
 from cs4.core.content_summarizer import ContentSummarizer
 from cs4.core.evaluator import ConstraintEvaluator
 from cs4.core.blog_merger import BlogMerger
+from cs4.core.constraint_replacer import ConstraintReplacer
 
 __all__ = [
     "ConstraintGenerator",
@@ -18,4 +19,5 @@ __all__ = [
     "ContentSummarizer",
     "ConstraintEvaluator",
     "BlogMerger",
+    "ConstraintReplacer",
 ]
