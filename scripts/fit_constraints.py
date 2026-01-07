@@ -66,6 +66,11 @@ def main():
         help="Column name containing constraints in the constraints CSV"
     )
     parser.add_argument(
+        "--base-column",
+        default="base_content",
+        help="Column name containing base content (default: base_content)"
+    )
+    parser.add_argument(
         "--logging-config",
         default="configs/logging_config.yaml",
         help="Path to logging config"
@@ -116,7 +121,9 @@ def main():
         result_df = fitter.fit_batch(
             constraints_df=constraints_df,
             base_df=base_df,
-            output_path=args.output_path
+            output_path=args.output_path,
+            base_column=args.base_column,
+            constraint_column=args.constraint_column
         )
         logger.info(f"Successfully fitted content for {len(result_df)} samples")
         
