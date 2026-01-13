@@ -4,9 +4,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from dolma.scripts.utils.config_loader import load_yaml, stamp, fill_vars
-from dolma.scripts.utils.log_utils import setup_logging, get_logger
-from dolma.scripts.utils.io_utils import ensure_dir, decompress_gz, decompress_zst
+from cs4.utils.config_loader import load_yaml, stamp, fill_vars
+from cs4.utils.log_utils import setup_logging, get_logger
+from cs4.utils.io_utils import ensure_dir, decompress_gz, decompress_zst
 
 def decompress_file(src: Path, out_dir: Path, logger, delete_src: bool):
     if src.suffix not in {".zst", ".gz"}:
@@ -52,7 +52,7 @@ def decompress_file(src: Path, out_dir: Path, logger, delete_src: bool):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", required=True, help="path to unzip_config.yaml")
-    ap.add_argument("--logging", default="dolma/configs/logging_config.yaml")
+    ap.add_argument("--logging", default="configs/logging_config.yaml")
     ap.add_argument("--vars", nargs="*", default=[], help="override vars like download_timestamp=20251007_120654_download")
     args = ap.parse_args()
 
@@ -69,9 +69,9 @@ def main():
     ensure_dir(logs_dir)
 
     # 3️⃣ setup job-specific logging after directories exist
-    job_log = logs_dir / "dolma_unzip.log"
+    job_log = logs_dir / "cs4_unzip.log"
     setup_logging(args.logging, job_log_file=job_log)
-    logger = get_logger("DolmaExtractor")
+    logger = get_logger("CS4Extractor")
 
     # 4️⃣ begin processing
     files = [p for p in input_dir.iterdir() if p.is_file() and p.suffix in {".zst", ".gz"}]

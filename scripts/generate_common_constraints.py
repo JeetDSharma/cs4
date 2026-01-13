@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 """
-CLI script for fitting content to constraints.
+CLI script for generating common constraints from two blogs.
 """
 
 import argparse
 import sys
 from pathlib import Path
 
-# Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pandas as pd
-
-from cs4.core.constraint_fitter import ConstraintFitter
+from cs4.core.common_constraint_generator import CommonConstraintGenerator
 from cs4.utils.llm_client import OpenAIClient, AnthropicClient, get_total_usage
 from cs4.utils.log_utils import setup_logging, get_logger
 from cs4.config import Config
@@ -20,7 +18,7 @@ from cs4.config import Config
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Fit base content to satisfy constraints"
+        description="Generate common constraints from two blogs"
     )
     parser.add_argument(
         "--domain",
@@ -29,24 +27,29 @@ def main():
         help="Content domain"
     )
     parser.add_argument(
-        "--constraints-path",
+        "--input-path",
         required=True,
-        help="Path to constraints CSV"
-    )
-    parser.add_argument(
-        "--base-path",
-        required=True,
-        help="Path to base generated content CSV"
+        help="Path to input CSV with blog pairs"
     )
     parser.add_argument(
         "--output-path",
         required=True,
-        help="Path to output CSV (e.g., fitted_content.csv)"
+        help="Path to output CSV (e.g., common_constraints.csv)"
+    )
+    parser.add_argument(
+        "--blog1-column",
+        default="Blog A",
+        help="Name of column containing first blog"
+    )
+    parser.add_argument(
+        "--blog2-column",
+        default="Blog B",
+        help="Name of column containing second blog"
     )
     parser.add_argument(
         "--model",
-        default=Config.DEFAULT_FITTING_MODEL,
-        help=f"LLM model to use (default: {Config.DEFAULT_FITTING_MODEL})"
+        default=Config.DEFAULT_CONSTRAINT_MODEL,
+        help=f"LLM model to use (default: {Config.DEFAULT_CONSTRAINT_MODEL})"
     )
     parser.add_argument(
         "--provider",
@@ -61,14 +64,10 @@ def main():
         help="Number of retry attempts on failure"
     )
     parser.add_argument(
-        "--constraint-column",
-        default="selected_constraints",
-        help="Column name containing constraints in the constraints CSV"
-    )
-    parser.add_argument(
-        "--base-column",
-        default="base_content",
-        help="Column name containing base content (default: base_content)"
+        "--delay",
+        type=float,
+        default=1.0,
+        help="Delay between retries (seconds)"
     )
     parser.add_argument(
         "--logging-config",
@@ -79,23 +78,22 @@ def main():
     args = parser.parse_args()
     
     # Setup logging
-    log_file = Config.LOGS_DIR / "constraint_fitting.log"
+    log_file = Config.LOGS_DIR / "common_constraint_generation.log"
     setup_logging(args.logging_config, job_log_file=log_file)
     logger = get_logger("CS4Generator")
     
-    logger.info(f"Starting constraint fitting for domain: {args.domain}")
-    logger.info(f"Constraints: {args.constraints_path}")
-    logger.info(f"Base content: {args.base_path}")
+    logger.info(f"Starting common constraint generation for domain: {args.domain}")
+    logger.info(f"Input: {args.input_path}")
     logger.info(f"Output: {args.output_path}")
+    logger.info(f"Blog columns: '{args.blog1_column}', '{args.blog2_column}'")
     logger.info(f"Model: {args.model}")
     
     # Load input data
     try:
-        constraints_df = pd.read_csv(args.constraints_path, encoding="utf-8")
-        base_df = pd.read_csv(args.base_path, encoding="utf-8")
-        logger.info(f"Loaded {len(constraints_df)} constraints, {len(base_df)} base samples")
+        df = pd.read_csv(args.input_path, encoding="utf-8")
+        logger.info(f"Loaded {len(df)} blog pairs")
     except Exception as e:
-        logger.error(f"Failed to load input files: {e}")
+        logger.error(f"Failed to load input file: {e}")
         sys.exit(1)
     
     # Initialize LLM client
@@ -108,34 +106,33 @@ def main():
         logger.error(f"Failed to initialize LLM client: {e}")
         sys.exit(1)
     
-    # Initialize fitter
-    fitter = ConstraintFitter(
+    # Initialize generator
+    generator = CommonConstraintGenerator(
         llm_client=client,
         model=args.model,
-        content_type=args.domain,           
-        retry_attempts=args.retry_attempts
+        retry_attempts=args.retry_attempts,
+        delay=args.delay
     )
     
-    # Fit content to constraints
+    # Generate common constraints
     try:
-        result_df = fitter.fit_batch(
-            constraints_df=constraints_df,
-            base_df=base_df,
-            output_path=args.output_path,
-            base_column=args.base_column,
-            constraint_column=args.constraint_column
+        result_df = generator.generate_constraints_batch(
+            df=df,
+            blog1_column=args.blog1_column,
+            blog2_column=args.blog2_column,
+            output_path=args.output_path
         )
-        logger.info(f"Successfully fitted content for {len(result_df)} samples")
+        logger.info(f"Successfully generated common constraints for {len(result_df)} pairs")
         
         # Print usage summary
         usage = get_total_usage()
         logger.info(f"Total tokens used: {usage['total_tokens']}")
         
     except Exception as e:
-        logger.error(f"Constraint fitting failed: {e}")
+        logger.error(f"Common constraint generation failed: {e}")
         sys.exit(1)
     
-    logger.info("Constraint fitting complete!")
+    logger.info("Common constraint generation complete!")
 
 
 if __name__ == "__main__":

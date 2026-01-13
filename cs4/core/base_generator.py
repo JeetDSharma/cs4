@@ -105,7 +105,8 @@ class BaseGenerator:
         self,
         df: pd.DataFrame,
         task_column: str = "main_task",
-        output_path: Optional[str] = None
+        output_path: Optional[str] = None,
+        deduplicate_by_instruction: bool = True
     ) -> pd.DataFrame:
         """
         Generate base content for a batch of tasks.
@@ -114,6 +115,9 @@ class BaseGenerator:
             df: Input DataFrame with tasks (typically from constraints.csv)
             task_column: Name of column containing task descriptions
             output_path: Optional path to save results
+            deduplicate_by_instruction: If True and instruction_number exists with duplicates,
+                                       generate base content once per unique instruction_number
+                                       and replicate across all rows (for expanded constraints)
             
         Returns:
             DataFrame with generated base content
@@ -128,43 +132,107 @@ class BaseGenerator:
             has_instruction_num = False
             self.logger.warning("No 'instruction_number' column found, using index")
         
-        self.logger.info(f"Generating base content for {len(df)} tasks")
+        # Check if deduplication is needed (expanded constraints with subset_size)
+        needs_deduplication = (
+            deduplicate_by_instruction and 
+            has_instruction_num and 
+            df["instruction_number"].duplicated().any()
+        )
         
-        results = []
-        for idx, row in df.iterrows():
-            task = row[task_column]
-            instruction_num = row["instruction_number"] if has_instruction_num else idx + 1
+        if needs_deduplication:
+            self.logger.info(f"Detected {df['instruction_number'].duplicated().sum()} duplicate instruction_numbers")
+            self.logger.info("Will generate base content once per unique instruction_number")
             
-            self.logger.info(f"Processing task #{instruction_num}")
+            # Get unique tasks by instruction_number
+            unique_df = df.drop_duplicates(subset=["instruction_number"]).copy()
+            self.logger.info(f"Generating base content for {len(unique_df)} unique tasks (from {len(df)} total rows)")
             
-            try:
-                content, tokens = self.generate_base_content(task, log=True)
+            # Generate for unique tasks
+            base_results = []
+            for idx, row in unique_df.iterrows():
+                task = row[task_column]
+                instruction_num = row["instruction_number"]
                 
-                results.append({
-                    "instruction_number": instruction_num,
-                    "main_task": task,
-                    "base_content": content,
-                    "content_length": len(content),
-                    "model_used": self.model,
-                    "tokens_used": tokens,
-                    "timestamp": datetime.now().isoformat()
-                })
+                self.logger.info(f"Processing task #{instruction_num}")
                 
-            except Exception as e:
-                self.logger.error(
-                    f"Failed to generate base content for task {instruction_num}: {e}"
-                )
-                results.append({
-                    "instruction_number": instruction_num,
-                    "main_task": task,
-                    "base_content": "",
-                    "content_length": 0,
-                    "model_used": self.model,
-                    "tokens_used": 0,
-                    "timestamp": datetime.now().isoformat()
-                })
-        
-        result_df = pd.DataFrame(results)
+                try:
+                    content, tokens = self.generate_base_content(task, log=True)
+                    
+                    base_results.append({
+                        "instruction_number": instruction_num,
+                        "main_task": task,
+                        "base_content": content,
+                        "content_length": len(content),
+                        "model_used": self.model,
+                        "tokens_used": tokens,
+                        "timestamp": datetime.now().isoformat()
+                    })
+                    
+                except Exception as e:
+                    self.logger.error(
+                        f"Failed to generate base content for task {instruction_num}: {e}"
+                    )
+                    base_results.append({
+                        "instruction_number": instruction_num,
+                        "main_task": task,
+                        "base_content": "",
+                        "content_length": 0,
+                        "model_used": self.model,
+                        "tokens_used": 0,
+                        "timestamp": datetime.now().isoformat()
+                    })
+            
+            base_df = pd.DataFrame(base_results)
+            
+            # Merge back to original df to replicate base content across all rows
+            result_df = df.merge(
+                base_df[["instruction_number", "base_content", "content_length", 
+                         "model_used", "tokens_used", "timestamp"]],
+                on="instruction_number",
+                how="left"
+            )
+            
+            self.logger.info(f"Replicated base content across {len(result_df)} rows")
+            
+        else:
+            # Original behavior for backward compatibility
+            self.logger.info(f"Generating base content for {len(df)} tasks")
+            
+            results = []
+            for idx, row in df.iterrows():
+                task = row[task_column]
+                instruction_num = row["instruction_number"] if has_instruction_num else idx + 1
+                
+                self.logger.info(f"Processing task #{instruction_num}")
+                
+                try:
+                    content, tokens = self.generate_base_content(task, log=True)
+                    
+                    results.append({
+                        "instruction_number": instruction_num,
+                        "main_task": task,
+                        "base_content": content,
+                        "content_length": len(content),
+                        "model_used": self.model,
+                        "tokens_used": tokens,
+                        "timestamp": datetime.now().isoformat()
+                    })
+                    
+                except Exception as e:
+                    self.logger.error(
+                        f"Failed to generate base content for task {instruction_num}: {e}"
+                    )
+                    results.append({
+                        "instruction_number": instruction_num,
+                        "main_task": task,
+                        "base_content": "",
+                        "content_length": 0,
+                        "model_used": self.model,
+                        "tokens_used": 0,
+                        "timestamp": datetime.now().isoformat()
+                    })
+            
+            result_df = pd.DataFrame(results)
         
         if output_path:
             result_df.to_csv(output_path, index=False, encoding="utf-8")

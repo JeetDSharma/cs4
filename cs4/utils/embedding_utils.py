@@ -6,6 +6,7 @@ Based on working story_NN_search.py logic.
 import csv
 import pickle
 import os
+import sys
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from tqdm import tqdm
@@ -13,17 +14,42 @@ from tqdm import tqdm
 from cs4.config import Config
 
 
-def read_texts(file_path, max_size):
-    """Read texts from CSV file - exact same function as story_NN_search.py"""
+def read_texts(file_path, max_size, min_words=None, max_words=None):
+    """Read texts from CSV file with optional word count filtering
+    
+    Args:
+        file_path: Path to CSV file
+        max_size: Maximum number of texts to read
+        min_words: Minimum word count per text (inclusive, optional)
+        max_words: Maximum word count per text (inclusive, optional)
+    """
+    # Increase CSV field size limit to handle large text fields
+    csv.field_size_limit(sys.maxsize)
+    
     texts = []
+    skipped = 0
     with open(file_path, encoding='utf8') as f:
         reader = csv.DictReader(f)
         for row in reader:
             txt = row.get("text", "").strip()
             if txt:
+                # Apply word count filtering if specified
+                if min_words is not None or max_words is not None:
+                    word_count = len(txt.split())
+                    if min_words is not None and word_count < min_words:
+                        skipped += 1
+                        continue
+                    if max_words is not None and word_count > max_words:
+                        skipped += 1
+                        continue
+                
                 texts.append(txt)
             if len(texts) >= max_size:
                 break
+    
+    if skipped > 0:
+        print(f"Filtered out {skipped} texts based on word count constraints")
+    
     return texts
 
 
@@ -31,26 +57,43 @@ def load_or_create_embeddings(
     file_path, 
     max_size=1000, 
     model_name='all-mpnet-base-v2',
-    cache_dir=None
+    cache_dir=None,
+    min_words=None,
+    max_words=None
 ):
     """
     Load embeddings from cache or create new ones.
-    Uses exact same logic as story_NN_search.py
+    
+    Args:
+        file_path: Path to CSV file with blogs
+        max_size: Maximum number of blogs to process
+        model_name: Sentence transformer model name
+        cache_dir: Directory to cache embeddings
+        min_words: Minimum word count per text (optional)
+        max_words: Maximum word count per text (optional)
     """
     # Use Config.OUTPUTS_DIR if no cache_dir specified
     if cache_dir is None:
         cache_dir = Config.OUTPUTS_DIR
     
     model = SentenceTransformer(model_name)
-    embedding_cache_path = os.path.join(
-        cache_dir, 
-        f'embeddings-{model_name.replace("/", "_")}-size-{max_size}.pkl'
-    )
+    
+    # Build cache filename with word count filters if specified
+    cache_filename = f'embeddings-{model_name.replace("/", "_")}-size-{max_size}'
+    if min_words is not None:
+        cache_filename += f'-min{min_words}'
+    if max_words is not None:
+        cache_filename += f'-max{max_words}'
+    cache_filename += '.pkl'
+    
+    embedding_cache_path = os.path.join(cache_dir, cache_filename)
     
     # Check if embedding cache path exists
     if not os.path.exists(embedding_cache_path):
         print("Encode the corpus. This might take a while")
-        corpus_sentences = read_texts(file_path, max_size)
+        if min_words is not None or max_words is not None:
+            print(f"Filtering texts: min_words={min_words}, max_words={max_words}")
+        corpus_sentences = read_texts(file_path, max_size, min_words, max_words)
         corpus_embeddings = model.encode(
             corpus_sentences, 
             show_progress_bar=True, 

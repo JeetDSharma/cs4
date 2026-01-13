@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 """
-CLI script for fitting content to constraints.
+CLI script for replacing easy constraints with harder ones.
 """
 
 import argparse
 import sys
 from pathlib import Path
 
-# Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pandas as pd
-
-from cs4.core.constraint_fitter import ConstraintFitter
+from cs4.core.constraint_replacer import ConstraintReplacer
 from cs4.utils.llm_client import OpenAIClient, AnthropicClient, get_total_usage
 from cs4.utils.log_utils import setup_logging, get_logger
 from cs4.config import Config
@@ -20,18 +18,12 @@ from cs4.config import Config
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Fit base content to satisfy constraints"
-    )
-    parser.add_argument(
-        "--domain",
-        choices=["blog", "story", "news"],
-        default="blog",
-        help="Content domain"
+        description="Replace satisfied (easy) constraints with harder ones"
     )
     parser.add_argument(
         "--constraints-path",
         required=True,
-        help="Path to constraints CSV"
+        help="Path to original constraints CSV"
     )
     parser.add_argument(
         "--base-path",
@@ -39,14 +31,19 @@ def main():
         help="Path to base generated content CSV"
     )
     parser.add_argument(
+        "--evaluation-path",
+        required=True,
+        help="Path to base evaluation results CSV"
+    )
+    parser.add_argument(
         "--output-path",
         required=True,
-        help="Path to output CSV (e.g., fitted_content.csv)"
+        help="Path to output revised constraints CSV"
     )
     parser.add_argument(
         "--model",
-        default=Config.DEFAULT_FITTING_MODEL,
-        help=f"LLM model to use (default: {Config.DEFAULT_FITTING_MODEL})"
+        default=Config.DEFAULT_CONSTRAINT_MODEL,
+        help=f"LLM model to use (default: {Config.DEFAULT_CONSTRAINT_MODEL})"
     )
     parser.add_argument(
         "--provider",
@@ -61,16 +58,6 @@ def main():
         help="Number of retry attempts on failure"
     )
     parser.add_argument(
-        "--constraint-column",
-        default="selected_constraints",
-        help="Column name containing constraints in the constraints CSV"
-    )
-    parser.add_argument(
-        "--base-column",
-        default="base_content",
-        help="Column name containing base content (default: base_content)"
-    )
-    parser.add_argument(
         "--logging-config",
         default="configs/logging_config.yaml",
         help="Path to logging config"
@@ -78,27 +65,25 @@ def main():
     
     args = parser.parse_args()
     
-    # Setup logging
-    log_file = Config.LOGS_DIR / "constraint_fitting.log"
+    log_file = Config.LOGS_DIR / "constraint_replacement.log"
     setup_logging(args.logging_config, job_log_file=log_file)
     logger = get_logger("CS4Generator")
     
-    logger.info(f"Starting constraint fitting for domain: {args.domain}")
+    logger.info("Starting constraint replacement (Method 1)")
     logger.info(f"Constraints: {args.constraints_path}")
     logger.info(f"Base content: {args.base_path}")
+    logger.info(f"Evaluation: {args.evaluation_path}")
     logger.info(f"Output: {args.output_path}")
-    logger.info(f"Model: {args.model}")
     
-    # Load input data
     try:
         constraints_df = pd.read_csv(args.constraints_path, encoding="utf-8")
         base_df = pd.read_csv(args.base_path, encoding="utf-8")
-        logger.info(f"Loaded {len(constraints_df)} constraints, {len(base_df)} base samples")
+        evaluation_df = pd.read_csv(args.evaluation_path, encoding="utf-8")
+        logger.info(f"Loaded {len(constraints_df)} samples")
     except Exception as e:
         logger.error(f"Failed to load input files: {e}")
         sys.exit(1)
     
-    # Initialize LLM client
     try:
         if args.provider == "openai":
             client = OpenAIClient(log_usage=True)
@@ -108,34 +93,29 @@ def main():
         logger.error(f"Failed to initialize LLM client: {e}")
         sys.exit(1)
     
-    # Initialize fitter
-    fitter = ConstraintFitter(
+    replacer = ConstraintReplacer(
         llm_client=client,
         model=args.model,
-        content_type=args.domain,           
         retry_attempts=args.retry_attempts
     )
     
-    # Fit content to constraints
     try:
-        result_df = fitter.fit_batch(
+        result_df = replacer.replace_batch(
             constraints_df=constraints_df,
             base_df=base_df,
-            output_path=args.output_path,
-            base_column=args.base_column,
-            constraint_column=args.constraint_column
+            evaluation_df=evaluation_df,
+            output_path=args.output_path
         )
-        logger.info(f"Successfully fitted content for {len(result_df)} samples")
+        logger.info(f"Successfully replaced constraints for {len(result_df)} samples")
         
-        # Print usage summary
         usage = get_total_usage()
         logger.info(f"Total tokens used: {usage['total_tokens']}")
         
     except Exception as e:
-        logger.error(f"Constraint fitting failed: {e}")
+        logger.error(f"Constraint replacement failed: {e}")
         sys.exit(1)
     
-    logger.info("Constraint fitting complete!")
+    logger.info("Constraint replacement complete!")
 
 
 if __name__ == "__main__":
