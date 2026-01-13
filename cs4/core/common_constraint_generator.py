@@ -112,6 +112,15 @@ class CommonConstraintGenerator:
         raise RuntimeError("Failed to generate common constraints")
     
     def _parse_response(self, response_text: str) -> tuple[str, str]:
+        """
+        Parse LLM response to extract main task and constraints.
+        
+        Args:
+            response_text: Raw LLM response
+            
+        Returns:
+            Tuple of (main_task, constraints)
+        """
         lines = response_text.strip().split('\n')
         main_task = ""
         constraints_lines = []

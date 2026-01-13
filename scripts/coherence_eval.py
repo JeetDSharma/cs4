@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+#This script fits the base content to set of 23 constraints and then evaluates the revised content against another article based on grammar, coherence, likeability etc.
+#to run the script, first first the articles need to be revised(on 23 constraints) using --revise-input and --revise-output arguments
+#then run the evaluation phase using --base-path, --article2-path and --eval-output
 from http import client
 import re
 import os
