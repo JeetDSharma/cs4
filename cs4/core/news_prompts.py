@@ -2,83 +2,162 @@
 System prompts for different stages of the CS4 pipeline.
 """
 
-CONSTRAINT_GENERATION_PROMPT = """You are a writing expert. I am going to give you a blog as an input. 
-You can assume that a large language model (LLM) generated the blog.
+# CONSTRAINT_GENERATION_PROMPT = """You are a writing expert. I am going to give you a blog as an input. 
+# You can assume that a large language model (LLM) generated the blog.
+
+# Your task has two parts:
+# 1. Identify the main task of the blog in one sentence. 
+#    - For example: "The main task is to write a blog about strategies for successful remote working."
+#    - Phrase the main task as an instruction.
+# 2. Generate a set of 39 free-form constraints that you think might have been given to the LLM to generate the blog.
+#    - DO NOT REPEAT CONSTRAINTS.
+#    - Constraints must be atomic (a single indivisible condition). If a constraint can be broken into smaller constraints, do so.
+#    - Avoid proper nouns in your constraints.
+#    - Constraints should drive at least a few sentences in the blog (do not write constraints that map to only one line).
+#    - Constraints must strictly pertain to the content, ideas, arguments, or narrative direction of the blog and should influence how the blog develops.
+#    - If (and only if) you cannot write 39 atomic, content-based constraints, give stylistic constraints based on how the blog is written (tone, use of examples, formatting, etc.).
+#    - Write all constraints in the form of instructions. For example: "The blog should include practical tips."
+#    - CRITICAL RANDOMIZATION STEP: You must disrupt the chronological flow. To do this, strictly follow this pattern: Write your first constraint about the conclusion of the blog. Write your second constraint about the introduction. Write your third constraint about the middle. Continue jumping back and forth across the timeline of the narrative for all 39 constraints. The final list must feel completely scrambled with no narrative arc.
+
+# Here is a worked example to guide you:
+
+# Input Blog: 
+# Working from home has become the new normal for millions of professionals worldwide. While it offers flexibility and eliminates commutes, it also presents unique challenges that can impact both productivity and well-being.
+
+# To optimize your home workspace, start by creating a dedicated area free from distractions. This space should have good lighting, comfortable seating, and all necessary equipment within reach. Many experts recommend facing a window for natural light, which can boost mood and energy levels.
+
+# Establish clear boundaries between work and personal time. Set specific work hours and stick to them, just as you would in an office. Communicate these boundaries to family members or housemates to minimize interruptions during work hours.
+
+# Take regular breaks throughout the day. The Pomodoro Technique, which involves 25-minute focused work sessions followed by 5-minute breaks, can help maintain concentration and prevent burnout. Use break time to stretch, hydrate, or take a short walk.
+
+# Stay connected with colleagues through regular video calls and instant messaging. This helps maintain team cohesion and prevents feelings of isolation. Schedule virtual coffee breaks or team-building activities to foster relationships.
+
+# Finally, prioritize your physical and mental health. Maintain a regular exercise routine, eat nutritious meals, and get adequate sleep. Consider meditation or mindfulness practices to manage stress and maintain focus.
+
+# Output:
+# Main Task: Write a blog about strategies for successful remote working.
+
+# Constraints:
+# 1. Require the setting of defined working hours.
+# 2. Explain the risks of isolation if connection practices are neglected.
+# 3. Warn about the risk of burnout without intentional self-care.
+# 4. Explain how the removal of commuting affects time use and daily rhythm.
+# 5. Suggest strategies for maintaining healthy eating while at home.
+# 6. Emphasize reducing environmental distractions in that space.
+# 7. Argue for the necessity of regular breaks during the workday.
+# 8. Encourage informal online gatherings to maintain rapport.
+# 9. Recommend mindfulness or meditation as stress-management tools.
+# 10. Stress the value of adhering consistently to those hours.
+# 11. Show how workspace ergonomics (chair, desk) influence long-term health.
+# 12. Conclude with a call to action urging readers to adopt concrete changes immediately.
+# 13. Link exercise directly to improved cognitive performance and focus.
+# 14. Establish remote work as a global trend that has transformed professional life.
+# 15. Connect emotional well-being to overall job performance and satisfaction.
+# 16. Explain how balanced nutrition influences concentration and resilience.
+# 17. Emphasize communicating work schedules to others in the household.
+# 18. Identify productivity as a central theme in remote work discussions.
+# 19. Recommend scheduled video calls to replicate face-to-face connection.
+# 20. Recommend creating a physically separate space for work at home.
+# 21. Stress the need for essential tools and equipment to be easily accessible.
+# 22. Recommend light physical movement or stretching during pauses.
+# 23. Integrate workspace, scheduling, health, and social practices into a unified remote-work strategy.
+# 24. Stress the importance of sleep in sustaining energy and productivity.
+# 25. Highlight the role of hydration and snacks in sustaining energy across breaks.
+# 26. Suggest environmental cues (like décor or layout) that reinforce the sense of a work zone.
+# 27. Describe the importance of adequate lighting for focus and energy.
+# 28. Introduce one structured time-management method, such as work intervals.
+# 29. Show how mental health practices support long-term work sustainability.
+# 30. Show how shared rituals (e.g., virtual coffee breaks) strengthen belonging.
+# 31. Highlight well-being as equally important alongside productivity.
+# 32. Warn about the risk of personal time erosion without such boundaries.
+# 33. Contrast the flexibility of remote work with the new challenges it creates.
+# 34. Suggest instant messaging as a tool for quick, ongoing collaboration.
+# 35. Highlight how a clear boundary between workspace and leisure areas aids focus.
+# 36. Show how enforcing those boundaries prevents interruptions.
+# 37. Recommend establishing a routine for daily physical exercise.
+# 38. Explain how breaks counteract mental fatigue and sustain performance.
+# 39. Stress that remote work requires deliberate maintenance of social contact.
+
+# Now use the same approach for the next input blog.
+# """
+
+CONSTRAINT_GENERATION_PROMPT = """You are a writing expert. I am going to give you a news article as an input.
+You can assume that a large language model (LLM) generated the news article.
 
 Your task has two parts:
-1. Identify the main task of the blog in one sentence. 
-   - For example: "The main task is to write a blog about strategies for successful remote working."
+1. Identify the main task of the news article in one sentence.
+   - For example: "The main task is to write a news article about 43rd Annual Greek Experience Festival June 7-9 In Danbury."
    - Phrase the main task as an instruction.
-2. Generate a set of 39 free-form constraints that you think might have been given to the LLM to generate the blog.
+2. Generate a set of 39 free-form constraints that you think might have been given to the LLM to generate the news article.
    - DO NOT REPEAT CONSTRAINTS.
    - Constraints must be atomic (a single indivisible condition). If a constraint can be broken into smaller constraints, do so.
    - Avoid proper nouns in your constraints.
-   - Constraints should drive at least a few sentences in the blog (do not write constraints that map to only one line).
-   - Constraints must strictly pertain to the content, ideas, arguments, or narrative direction of the blog and should influence how the blog develops.
-   - If (and only if) you cannot write 39 atomic, content-based constraints, give stylistic constraints based on how the blog is written (tone, use of examples, formatting, etc.).
-   - Write all constraints in the form of instructions. For example: "The blog should include practical tips."
-   - CRITICAL RANDOMIZATION STEP: You must disrupt the chronological flow. To do this, strictly follow this pattern: Write your first constraint about the conclusion of the blog. Write your second constraint about the introduction. Write your third constraint about the middle. Continue jumping back and forth across the timeline of the narrative for all 39 constraints. The final list must feel completely scrambled with no narrative arc.
+   - Constraints should drive at least a few sentences in the news article (do not write constraints that map to only one line).
+   - Constraints must strictly pertain to the content, ideas, arguments, or narrative direction of the news article and should influence how the news article develops.
+   - If (and only if) you cannot write 39 atomic, content-based constraints, give stylistic constraints based on how the news article is written (tone, use of examples, formatting, etc.).
+   - Write all constraints in the form of instructions. For example: “The story should center on a disappearance.” “Authorities should coordinate a large-scale search effort."
+   - Do not write constraints in the same order or phrasing as the article text. Randomize the order of the constraints.
+
+Return the result ONLY in this exact format, with no extra text, commentary, or Markdown:
+
+Main Task: <one sentence instruction>
+
+Constraints:
+1. <constraint 1>
+2. <constraint 2>
+...
+39. <constraint 39>
 
 Here is a worked example to guide you:
 
-Input Blog: 
-Working from home has become the new normal for millions of professionals worldwide. While it offers flexibility and eliminates commutes, it also presents unique challenges that can impact both productivity and well-being.
-
-To optimize your home workspace, start by creating a dedicated area free from distractions. This space should have good lighting, comfortable seating, and all necessary equipment within reach. Many experts recommend facing a window for natural light, which can boost mood and energy levels.
-
-Establish clear boundaries between work and personal time. Set specific work hours and stick to them, just as you would in an office. Communicate these boundaries to family members or housemates to minimize interruptions during work hours.
-
-Take regular breaks throughout the day. The Pomodoro Technique, which involves 25-minute focused work sessions followed by 5-minute breaks, can help maintain concentration and prevent burnout. Use break time to stretch, hydrate, or take a short walk.
-
-Stay connected with colleagues through regular video calls and instant messaging. This helps maintain team cohesion and prevents feelings of isolation. Schedule virtual coffee breaks or team-building activities to foster relationships.
-
-Finally, prioritize your physical and mental health. Maintain a regular exercise routine, eat nutritious meals, and get adequate sleep. Consider meditation or mindfulness practices to manage stress and maintain focus.
+Input:
+Share event 43rd Annual Greek Festival Assumption Greek Orthodox Church in Danbury will host its 43rd Annual Greek Festival celebrating the rich culture of our Greek heritage June 7, 8 and 9 on the Church grounds - Clapboard Ridge Road. Food and Drink, Live Music, & Folk Dancing! Come enjoy our warm hospitality, learn more about our beautiful Byzantine Church, and experience our Orthodox Christian traditions. Admission is free to this fun-filled celebration that showcases many of the most beloved aspects of Greek culture including Folk Dancers performing in authentic costumes, live music, artisan crafts, wine and of course – delicious food. It’s easy to find! Just take exit 5 off of I-84 and follow the signs. There is additional free parking and shuttle service available at Danbury High School, as well.
 
 Output:
-Main Task: Write a blog about strategies for successful remote working.
+Main Task: Write a news article about 43rd Annual Greek Experience Festival June 7-9 In Danbury.
 
 Constraints:
-1. Require the setting of defined working hours.
-2. Explain the risks of isolation if connection practices are neglected.
-3. Warn about the risk of burnout without intentional self-care.
-4. Explain how the removal of commuting affects time use and daily rhythm.
-5. Suggest strategies for maintaining healthy eating while at home.
-6. Emphasize reducing environmental distractions in that space.
-7. Argue for the necessity of regular breaks during the workday.
-8. Encourage informal online gatherings to maintain rapport.
-9. Recommend mindfulness or meditation as stress-management tools.
-10. Stress the value of adhering consistently to those hours.
-11. Show how workspace ergonomics (chair, desk) influence long-term health.
-12. Conclude with a call to action urging readers to adopt concrete changes immediately.
-13. Link exercise directly to improved cognitive performance and focus.
-14. Establish remote work as a global trend that has transformed professional life.
-15. Connect emotional well-being to overall job performance and satisfaction.
-16. Explain how balanced nutrition influences concentration and resilience.
-17. Emphasize communicating work schedules to others in the household.
-18. Identify productivity as a central theme in remote work discussions.
-19. Recommend scheduled video calls to replicate face-to-face connection.
-20. Recommend creating a physically separate space for work at home.
-21. Stress the need for essential tools and equipment to be easily accessible.
-22. Recommend light physical movement or stretching during pauses.
-23. Integrate workspace, scheduling, health, and social practices into a unified remote-work strategy.
-24. Stress the importance of sleep in sustaining energy and productivity.
-25. Highlight the role of hydration and snacks in sustaining energy across breaks.
-26. Suggest environmental cues (like décor or layout) that reinforce the sense of a work zone.
-27. Describe the importance of adequate lighting for focus and energy.
-28. Introduce one structured time-management method, such as work intervals.
-29. Show how mental health practices support long-term work sustainability.
-30. Show how shared rituals (e.g., virtual coffee breaks) strengthen belonging.
-31. Highlight well-being as equally important alongside productivity.
-32. Warn about the risk of personal time erosion without such boundaries.
-33. Contrast the flexibility of remote work with the new challenges it creates.
-34. Suggest instant messaging as a tool for quick, ongoing collaboration.
-35. Highlight how a clear boundary between workspace and leisure areas aids focus.
-36. Show how enforcing those boundaries prevents interruptions.
-37. Recommend establishing a routine for daily physical exercise.
-38. Explain how breaks counteract mental fatigue and sustain performance.
-39. Stress that remote work requires deliberate maintenance of social contact.
+1. The story should center on an upcoming cultural celebration.
+2. The event should be hosted by a community or religious organization.
+3. The organization should have a long-standing tradition of holding this event annually.
+4. The event should celebrate a specific cultural or ethnic heritage.
+5. The story should indicate that the celebration spans multiple consecutive days.
+6. The event’s location should be mentioned with reference to a recognizable area or landmark.
+7. The story should state that the event is held on the organization’s premises.
+8. The festival should promote awareness of traditional customs and community values.
+9. The story should highlight the preservation of cultural identity as a theme.
+10. The event should emphasize the warm hospitality of the hosting community.
+11. The narrative should invite the public to experience the featured culture firsthand.
+12. Religious or spiritual elements should be included to connect the event to its heritage.
+13. The article should present the event as both entertaining and educational.
+14. The story should mention a variety of attractions or activities.
+15. Traditional food and drink should be featured prominently.
+16. The festival should include live performances for entertainment.
+17. Folk dancing should be identified as a key cultural activity.
+18. Authentic costumes should be highlighted as part of the performances.
+19. Live music should be described as enhancing the festive atmosphere.
+20. Artisan crafts should be included as part of the offerings.
+21. Visitors should have opportunities to learn about cultural traditions.
+22. The tone should convey warmth, joy, and community spirit.
+23. The story should encourage public participation and inclusivity.
+24. The article should express pride in the cultural heritage being celebrated.
+25. The narrative should appeal to the senses through vivid descriptions of the experience.
+26. The story should state that admission is free.
+27. Practical details for attendees should be provided.
+28. Directions or reference points should be given for ease of navigation.
+29. The article should mention additional parking or transportation options.
+30. Accessibility and convenience should be emphasized to attract attendees.
+31. The story should begin with a clear announcement of the event and its host.
+32. A section should describe the cultural or historical significance of the event.
+33. The middle part should list the main attractions and entertainment.
+34. The closing section should include logistical information for visitors.
+35. The tone throughout should remain promotional and welcoming.
+36. The structure should progress from general overview to detailed information.
+37. The story should use present or future tense for immediacy.
+38. The language should be simple, lively, and community-oriented.
+39. The narrative should maintain an informative tone typical of local event announcements.
 
-Now use the same approach for the next input blog.
+Now use the same approach for the next input news article.
 """
 
 # CONSTRAINT_GENERATION_PROMPT = """You are a writing expert. I will give you a blog as input.  
@@ -585,68 +664,142 @@ Output only the merged blog text, with no preamble or explanation."""
 # Prompt B: {story2} 
 # """
 
-COMMON_CONSTRAINT_GENERATION_PROMPT = """You are a writing expert. You will be given two blogs (Blog A and Blog B) as input.
-You can assume that a large language model (LLM) generated each blog.
+# COMMON_CONSTRAINT_GENERATION_PROMPT = """You are a writing expert. You will be given two blogs (Blog A and Blog B) as input.
+# You can assume that a large language model (LLM) generated each blog.
+
+# Your task has two parts:
+# 1. Identify a common main task that applies to BOTH blogs.
+#    - The main task must be implied by BOTH Blog A and Blog B — every detail in the task must be directly present in both blogs.
+#    - The more similar the blogs, the more specific the main task can be.
+#    - The more dissimilar the blogs, the more general the main task should be.
+#    - Phrase the main task as an instruction. Example: "Write a blog about strategies for successful remote working."
+
+# 2. Generate a set of 39 free-form constraints that apply to BOTH blogs.
+#    - Each constraint must be satisfied by BOTH Blog A and Blog B.
+#    - DO NOT REPEAT CONSTRAINTS.
+#    - Constraints must be atomic (a single indivisible condition). If a constraint can be broken into smaller constraints, do so.
+#    - Avoid proper nouns in your constraints.
+#    - Constraints should drive at least a few sentences in both blogs (do not write constraints that map to only one line).
+#    - Constraints must strictly pertain to the content, ideas, arguments, or narrative direction and should influence how the blogs develop.
+#    - The more similar the blogs, the more specific and detailed the constraints should be.
+#    - The more dissimilar the blogs, the more general and abstract the constraints should be (e.g., "Include a conclusion" or "Use examples").
+#    - If the blogs are so dissimilar that you cannot find 39 content-based constraints, give stylistic constraints based on how both blogs are written (tone, use of examples, formatting, etc.).
+#    - Write all constraints in the form of instructions. Example: "The blog should include practical tips."
+#    - CRITICAL RANDOMIZATION STEP: Disrupt chronological flow. Write your first constraint about conclusions, second about introductions, third about middles. Continue jumping across the timeline. The final list must feel completely scrambled.
+
+# Here are examples showing how similarity affects output:
+
+# Example 1 (Dissimilar Blogs):
+# Blog A: A technical blog about Python web scraping with BeautifulSoup, including code examples and CSV export.
+# Blog B: A narrative blog about traveling through the Amazon rainforest, focusing on wildlife encounters.
+
+# Main Task: Write a blog that provides detailed information on a topic.
+
+# Constraints:
+# 1. End with a summary or concluding thought.
+# 2. Open with an introduction that establishes the topic.
+# 3. Include specific examples to illustrate points.
+# 4. Maintain a clear and organized structure.
+# 5. Use descriptive language to engage the reader.
+# ... (remaining constraints would be similarly general)
+
+# Example 2 (Very Similar Blogs):
+# Blog A: A blog about remote work productivity, discussing workspace setup, time management with Pomodoro, and work-life boundaries.
+# Blog B: A blog about working from home effectively, covering dedicated workspace creation, scheduled breaks, and separating work from personal time.
+
+# Main Task: Write a blog about strategies for successful remote working.
+
+# Constraints:
+# 1. Conclude with a call to action urging readers to implement changes.
+# 2. Establish remote work as a significant trend in professional life.
+# 3. Recommend creating a dedicated workspace at home.
+# 4. Emphasize reducing distractions in the work environment.
+# 5. Argue for the importance of regular breaks during work.
+# 6. Recommend a structured time-management approach.
+# 7. Stress setting clear boundaries between work and personal time.
+# 8. Suggest communicating work schedules to household members.
+# ... (remaining constraints would be similarly specific)
+
+# Now apply this approach to the following two blogs:
+
+# Blog A:
+# {blog1}
+
+# Blog B:
+# {blog2}
+
+# Output Format:
+# Main Task: [one sentence instruction]
+
+# Constraints:
+# 1. [constraint]
+# 2. [constraint]
+# ...
+# 39. [constraint]
+# """
+
+COMMON_CONSTRAINT_GENERATION_PROMPT = """You are a writing expert. You will be given two news articles (Article A and Article B) as input.
+You can assume that a large language model (LLM) generated each news article.
 
 Your task has two parts:
-1. Identify a common main task that applies to BOTH blogs.
-   - The main task must be implied by BOTH Blog A and Blog B — every detail in the task must be directly present in both blogs.
-   - The more similar the blogs, the more specific the main task can be.
-   - The more dissimilar the blogs, the more general the main task should be.
-   - Phrase the main task as an instruction. Example: "Write a blog about strategies for successful remote working."
+1. Identify a common main task that applies to BOTH news articles.
+   - The main task must be implied by BOTH news article A and news article B — every detail in the task must be directly present in both the news articles.
+   - The more similar the news articles, the more specific the main task can be.
+   - The more dissimilar the news articles, the more general the main task should be.
+   - Phrase the main task as an instruction. Example: "Report on recent developments related to changes in workplace policies."
 
-2. Generate a set of 39 free-form constraints that apply to BOTH blogs.
-   - Each constraint must be satisfied by BOTH Blog A and Blog B.
+2. Generate a set of 39 free-form constraints that apply to BOTH articles.
+   - Each constraint must be satisfied by article A and article B.
    - DO NOT REPEAT CONSTRAINTS.
    - Constraints must be atomic (a single indivisible condition). If a constraint can be broken into smaller constraints, do so.
    - Avoid proper nouns in your constraints.
-   - Constraints should drive at least a few sentences in both blogs (do not write constraints that map to only one line).
-   - Constraints must strictly pertain to the content, ideas, arguments, or narrative direction and should influence how the blogs develop.
-   - The more similar the blogs, the more specific and detailed the constraints should be.
-   - The more dissimilar the blogs, the more general and abstract the constraints should be (e.g., "Include a conclusion" or "Use examples").
-   - If the blogs are so dissimilar that you cannot find 39 content-based constraints, give stylistic constraints based on how both blogs are written (tone, use of examples, formatting, etc.).
-   - Write all constraints in the form of instructions. Example: "The blog should include practical tips."
+   - Constraints should drive at least a few sentences in both the articles (do not write constraints that map to only one line).
+   - Constraints must strictly pertain to the content, ideas, arguments, or narrative direction and should influence how the articles develop.
+   - The more similar the articles, the more specific and detailed the constraints should be.
+   - The more dissimilar the articles, the more general and abstract the constraints should be (e.g., "Include a conclusion" or "Use examples").
+   - If the articles are so dissimilar that you cannot find 39 content-based constraints, give stylistic constraints based on how both articles are written (tone, use of examples, formatting, etc.).
+   - Write all constraints in the form of instructions. Example: "The articles should include practical tips."
    - CRITICAL RANDOMIZATION STEP: Disrupt chronological flow. Write your first constraint about conclusions, second about introductions, third about middles. Continue jumping across the timeline. The final list must feel completely scrambled.
 
 Here are examples showing how similarity affects output:
 
-Example 1 (Dissimilar Blogs):
-Blog A: A technical blog about Python web scraping with BeautifulSoup, including code examples and CSV export.
-Blog B: A narrative blog about traveling through the Amazon rainforest, focusing on wildlife encounters.
+Example 1 (Dissimilar Articles):
+Article A: A breaking news report about a natural disaster focusing on immediate impacts and emergency response.
+Article B: An investigative article examining long-term issues in public infrastructure funding.
 
-Main Task: Write a blog that provides detailed information on a topic.
+Main Task: Write a news article that informs readers about a significant real-world issue.
 
 Constraints:
-1. End with a summary or concluding thought.
-2. Open with an introduction that establishes the topic.
-3. Include specific examples to illustrate points.
-4. Maintain a clear and organized structure.
-5. Use descriptive language to engage the reader.
+1. End with information that looks ahead to future developments.
+2. Open with a clear lead summarizing the core issue.
+3. Provide factual details supported by evidence.
+4. Maintain a neutral and objective reporting tone.
+5. Include contextual background to help readers understand the issue.
 ... (remaining constraints would be similarly general)
 
-Example 2 (Very Similar Blogs):
-Blog A: A blog about remote work productivity, discussing workspace setup, time management with Pomodoro, and work-life boundaries.
-Blog B: A blog about working from home effectively, covering dedicated workspace creation, scheduled breaks, and separating work from personal time.
+Example 2 (Very Similar Articles):
+Article A: A news article reporting on the rise of remote work, covering recent survey findings, employer policy changes, and statements from workers about productivity and work-life balance.
+Article B: A news article reporting on the continued expansion of work-from-home arrangements, highlighting company guidelines, expert commentary on productivity, and employee experiences with managing work-life boundaries.
 
-Main Task: Write a blog about strategies for successful remote working.
+Main Task: Report on recent trends in remote work and how they affect productivity and work-life balance.
 
 Constraints:
-1. Conclude with a call to action urging readers to implement changes.
-2. Establish remote work as a significant trend in professional life.
-3. Recommend creating a dedicated workspace at home.
-4. Emphasize reducing distractions in the work environment.
-5. Argue for the importance of regular breaks during work.
-6. Recommend a structured time-management approach.
-7. Stress setting clear boundaries between work and personal time.
-8. Suggest communicating work schedules to household members.
+1. Conclude by discussing how remote work policies may evolve in the near future.
+2. Open with a lead that summarizes the growing prevalence of remote work.
+3. Attribute productivity claims to surveys, studies, or expert commentary.
+4. Include perspectives from workers experiencing remote work firsthand.
+5. Report on employer or organizational policy changes related to remote work.
+6. Explain challenges related to managing work-life boundaries.
+7. Provide background on how remote work practices have changed over time.
+8. Maintain a neutral, factual, and non-prescriptive tone throughout.
 ... (remaining constraints would be similarly specific)
 
-Now apply this approach to the following two blogs:
+Now apply this approach to the following two news articles:
 
-Blog A:
+Article A:
 {blog1}
 
-Blog B:
+Article B:
 {blog2}
 
 Output Format:
@@ -658,7 +811,6 @@ Constraints:
 ...
 39. [constraint]
 """
-
 
 def get_common_constraint_generation_prompt() -> str:
     """Get the common constraint generation prompt."""
@@ -725,7 +877,7 @@ def get_summarization_prompt(
 CONSTRAINT_REPLACEMENT_PROMPT = """You are a writing expert. You are given:
 1. A main task
 2. A set of 39 constraints for that task
-3. A base story/blog written for that task
+3. A base story/blog/news article written for that task
 4. Evaluation results showing which constraints are already satisfied by the base content
 
 Your job is to create a REVISED set of 39 constraints by replacing the constraints that are already satisfied (marked "Yes") with NEW, HARDER constraints that are NOT satisfied by the base content.
@@ -789,3 +941,4 @@ def get_constraint_replacement_prompt(
         base_content=base_content,
         satisfaction_results=satisfaction_results
     )
+
