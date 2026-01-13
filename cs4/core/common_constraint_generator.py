@@ -83,6 +83,17 @@ class CommonConstraintGenerator:
                 
                 # Parse response to extract main task and constraints
                 main_task, constraints = self._parse_response(response_text)
+
+                if not constraints:
+                    self.logger.error(
+                        f"""
+                        EMPTY CONSTRAINTS PARSED
+                        ------------------------
+                        Raw LLM response:
+                        {response_text}
+                        ------------------------
+                        """
+                    )
                 
                 if log:
                     self.logger.info(f"Total tokens used: {tokens}")
@@ -113,17 +124,26 @@ class CommonConstraintGenerator:
         lines = response_text.strip().split('\n')
         main_task = ""
         constraints_lines = []
-        
+
         in_constraints = False
+
         for line in lines:
-            line = line.strip()
-            if line.startswith("Main Task:"):
-                main_task = line.replace("Main Task:", "").strip()
-            elif line.startswith("Constraints:"):
+            clean_line = line.strip().strip("*").strip()
+
+            lower = clean_line.lower()
+
+            if "main task" in lower:
+                if ":" in clean_line:
+                    main_task = clean_line.split(":", 1)[1].strip()
+                else:
+                    main_task = clean_line.replace("main task", "").strip()
+
+            elif "constraints" in lower:
                 in_constraints = True
-            elif in_constraints and line:
-                constraints_lines.append(line)
-        
+
+            elif in_constraints and clean_line:
+                constraints_lines.append(clean_line)
+
         constraints = "\n".join(constraints_lines)
         return main_task, constraints
     
