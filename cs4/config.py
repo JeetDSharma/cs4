@@ -32,7 +32,7 @@ class Config:
     DEFAULT_CONSTRAINT_MODEL = "gpt-4.1-mini"      # Constraint generation
     DEFAULT_BASE_GEN_MODEL = "gpt-4.1-mini"        # Base content generation
     DEFAULT_FITTING_MODEL = "gpt-4.1-mini"         # Constraint fitting
-    DEFAULT_EVALUATION_MODEL = "gpt-4.1-mini"      # Evaluation
+    DEFAULT_EVALUATION_MODEL = "claude-sonnet-4-20250514"      # Evaluation
     
     # Fallback default model (if task-specific not specified)
     DEFAULT_MODEL = "gpt-4.1-mini"
