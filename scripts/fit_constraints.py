@@ -29,14 +29,16 @@ def main():
         help="Content domain"
     )
     parser.add_argument(
+        "--input-path",
+        help="Path to combined CSV with both constraints and base content (new format)"
+    )
+    parser.add_argument(
         "--constraints-path",
-        required=True,
-        help="Path to constraints CSV"
+        help="Path to constraints CSV (legacy format, use with --base-path)"
     )
     parser.add_argument(
         "--base-path",
-        required=True,
-        help="Path to base generated content CSV"
+        help="Path to base generated content CSV (legacy format, use with --constraints-path)"
     )
     parser.add_argument(
         "--output-path",
@@ -63,12 +65,17 @@ def main():
     parser.add_argument(
         "--constraint-column",
         default="selected_constraints",
-        help="Column name containing constraints in the constraints CSV"
+        help="Column name containing constraints (default: selected_constraints)"
     )
     parser.add_argument(
         "--base-column",
         default="base_content",
         help="Column name containing base content (default: base_content)"
+    )
+    parser.add_argument(
+        "--task-column",
+        default="main_task",
+        help="Column name containing main task (default: main_task)"
     )
     parser.add_argument(
         "--logging-config",
@@ -78,22 +85,39 @@ def main():
     
     args = parser.parse_args()
     
+    # Validate input arguments
+    if args.input_path:
+        if args.constraints_path or args.base_path:
+            print("Error: Cannot use --input-path with --constraints-path or --base-path")
+            sys.exit(1)
+        use_combined = True
+    elif args.constraints_path and args.base_path:
+        use_combined = False
+    else:
+        print("Error: Must provide either --input-path OR both --constraints-path and --base-path")
+        sys.exit(1)
+    
     # Setup logging
     log_file = Config.LOGS_DIR / "constraint_fitting.log"
     setup_logging(args.logging_config, job_log_file=log_file)
     logger = get_logger("CS4Generator")
     
     logger.info(f"Starting constraint fitting for domain: {args.domain}")
-    logger.info(f"Constraints: {args.constraints_path}")
-    logger.info(f"Base content: {args.base_path}")
-    logger.info(f"Output: {args.output_path}")
     logger.info(f"Model: {args.model}")
+    logger.info(f"Output: {args.output_path}")
     
     # Load input data
     try:
-        constraints_df = pd.read_csv(args.constraints_path, encoding="utf-8")
-        base_df = pd.read_csv(args.base_path, encoding="utf-8")
-        logger.info(f"Loaded {len(constraints_df)} constraints, {len(base_df)} base samples")
+        if use_combined:
+            logger.info(f"Combined input: {args.input_path}")
+            combined_df = pd.read_csv(args.input_path, encoding="utf-8")
+            logger.info(f"Loaded {len(combined_df)} samples from combined CSV")
+        else:
+            logger.info(f"Constraints: {args.constraints_path}")
+            logger.info(f"Base content: {args.base_path}")
+            constraints_df = pd.read_csv(args.constraints_path, encoding="utf-8")
+            base_df = pd.read_csv(args.base_path, encoding="utf-8")
+            logger.info(f"Loaded {len(constraints_df)} constraints, {len(base_df)} base samples")
     except Exception as e:
         logger.error(f"Failed to load input files: {e}")
         sys.exit(1)
@@ -118,13 +142,22 @@ def main():
     
     # Fit content to constraints
     try:
-        result_df = fitter.fit_batch(
-            constraints_df=constraints_df,
-            base_df=base_df,
-            output_path=args.output_path,
-            base_column=args.base_column,
-            constraint_column=args.constraint_column
-        )
+        if use_combined:
+            result_df = fitter.fit_batch_combined(
+                base_constraints_df=combined_df,
+                output_path=args.output_path,
+                base_column=args.base_column,
+                constraint_column=args.constraint_column,
+                task_column=args.task_column
+            )
+        else:
+            result_df = fitter.fit_batch(
+                constraints_df=constraints_df,
+                base_df=base_df,
+                output_path=args.output_path,
+                base_column=args.base_column,
+                constraint_column=args.constraint_column
+            )
         logger.info(f"Successfully fitted content for {len(result_df)} samples")
         
         # Print usage summary

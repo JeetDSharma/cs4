@@ -223,3 +223,92 @@ class ConstraintFitter:
             self.logger.info(f"Fitted content saved to {output_path}")
         
         return result_df
+    
+    def fit_batch_combined(
+        self,
+        base_constraints_df: pd.DataFrame,
+        output_path: Optional[str] = None,
+        base_column: str = "base_content",
+        constraint_column: str = "selected_constraints",
+        task_column: str = "main_task"
+    ) -> pd.DataFrame:
+        """
+        Fit base content to constraints for a batch where both are in the same DataFrame.
+        
+        This method is designed for CSVs that contain both the base content and constraints
+        in a single file (e.g., from constraint subset experiments).
+        
+        Args:
+            base_constraints_df: DataFrame containing both base content and constraints
+            output_path: Optional path to save results
+            base_column: Column name containing base content (default: "base_content")
+            constraint_column: Column name containing constraints (default: "selected_constraints")
+            task_column: Column name containing the main task (default: "main_task")
+            
+        Returns:
+            DataFrame with all original columns plus a new "revised_base" column
+        """
+        # Validate required columns
+        if base_column not in base_constraints_df.columns:
+            raise ValueError(f"DataFrame must have '{base_column}' column")
+        if constraint_column not in base_constraints_df.columns:
+            raise ValueError(f"DataFrame must have '{constraint_column}' column")
+        if task_column not in base_constraints_df.columns:
+            raise ValueError(f"DataFrame must have '{task_column}' column")
+        
+        self.logger.info(f"Fitting content for {len(base_constraints_df)} samples")
+        
+        # Create a copy to avoid modifying the original
+        result_df = base_constraints_df.copy()
+        
+        # Initialize new columns
+        result_df["revised_base"] = ""
+        result_df["revised_length"] = 0
+        result_df["fitting_model"] = ""
+        result_df["fitting_tokens"] = 0
+        result_df["fitting_timestamp"] = ""
+        
+        for idx, row in base_constraints_df.iterrows():
+            task = row[task_column]
+            base_content = row[base_column]
+            constraints = row[constraint_column]
+            
+            # Log progress with instruction_number if available
+            if "instruction_number" in row:
+                self.logger.info(f"Processing sample #{row['instruction_number']} (row {idx + 1}/{len(base_constraints_df)})")
+            else:
+                self.logger.info(f"Processing row {idx + 1}/{len(base_constraints_df)}")
+            
+            try:
+                fitted_content, tokens = self.fit_content(
+                    task=task,
+                    base_content=base_content,
+                    constraints=constraints,
+                    log=True
+                )
+                
+                result_df.at[idx, "revised_base"] = fitted_content
+                result_df.at[idx, "revised_length"] = len(fitted_content)
+                result_df.at[idx, "fitting_model"] = self.model
+                result_df.at[idx, "fitting_tokens"] = tokens
+                result_df.at[idx, "fitting_timestamp"] = datetime.now().isoformat()
+                
+            except Exception as e:
+                self.logger.error(
+                    f"Failed to fit content for row {idx}: {e}"
+                )
+                result_df.at[idx, "revised_base"] = ""
+                result_df.at[idx, "revised_length"] = 0
+                result_df.at[idx, "fitting_model"] = self.model
+                result_df.at[idx, "fitting_tokens"] = 0
+                result_df.at[idx, "fitting_timestamp"] = datetime.now().isoformat()
+            
+            # Save incrementally after each row to prevent data loss
+            if output_path:
+                result_df.to_csv(output_path, index=False, encoding="utf-8")
+                self.logger.debug(f"Progress saved (row {idx + 1}/{len(base_constraints_df)})")
+        
+        if output_path:
+            self.logger.info(f"All fitted content saved to {output_path}")
+        
+        return result_df
