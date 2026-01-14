@@ -108,14 +108,24 @@ class ConstraintEvaluator:
         raise RuntimeError("Failed to evaluate content")
     
     def _extract_satisfaction_count(self, results: str) -> int:
-        """Extract the number of satisfied constraints from evaluation results."""
-        match = re.search(r'Number of constraints satisfied:\s*(\d+)', results)
-        if match:
-            return int(match.group(1))
-        
-        # Fallback: count "Yes" occurrences
-        yes_count = len(re.findall(r'^\d+\.\s+Yes', results, re.MULTILINE))
+        """
+        Extract number of satisfied constraints by counting explicit Yes/No judgments.
+        Do NOT trust the LLM's self-reported total.
+        """
+        matches = re.findall(
+            r'^\s*\d+\.\s*(Yes|No)\b',
+            results,
+            flags=re.MULTILINE
+        )
+
+        yes_count = sum(1 for m in matches if m == "Yes")
+
+        self.logger.debug(
+            f"Parsed {len(matches)} constraints, Yes={yes_count}"
+        )
+
         return yes_count
+
     
     def evaluate_batch(
         self,
