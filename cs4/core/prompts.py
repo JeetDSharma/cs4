@@ -790,3 +790,53 @@ def get_constraint_replacement_prompt(
         satisfaction_results=satisfaction_results
     )
 
+
+PAIRWISE_QUALITY_PROMPT = """You are an expert writing evaluator. You will be given two pieces of content (Content A and Content B) and you must compare them on three metrics:
+
+1. **Grammar**: Which content has better writing quality and grammar?
+2. **Coherence**: Which content has better logical flow and cohesion?
+3. **Likability**: Which content is more enjoyable and engaging to read?
+
+For each metric:
+- Provide a score out of 5 for both A and B
+- Specify which content you prefer (A or B)
+- Give a brief one-line reasoning for your preference
+
+After evaluating all three metrics, assign an overall winner (A or B) based on the category wins.
+
+IMPORTANT: Follow the exact format shown in the example below. Do not add extra text.
+
+Example Output Format:
+Grammar:
+A - 4/5
+B - 3/5
+Preference: A - Better sentence structure and fewer grammatical errors.
+
+Coherence:
+A - 4/5
+B - 4/5
+Preference: A - Slightly better narrative flow and transitions.
+
+Likability:
+A - 3/5
+B - 4/5
+Preference: B - More engaging tone and vivid descriptions.
+
+Overall Winner: A
+
+---
+
+Content A:
+{content_a}
+
+Content B:
+{content_b}"""
+
+
+def get_pairwise_quality_prompt(content_a: str, content_b: str) -> str:
+    """Get the pairwise quality evaluation prompt."""
+    return PAIRWISE_QUALITY_PROMPT.format(
+        content_a=content_a,
+        content_b=content_b
+    )
+
